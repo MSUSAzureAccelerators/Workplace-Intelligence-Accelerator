@@ -1,5 +1,7 @@
 ![MSUS Solution Accelerator](./images/MSUS%20Solution%20Accelerator%20Banner%20Two_981.jpg)
 
+# Workplace Intelligence Solution Accelerator
+
 ## About this repository
 Inspired employees are 125% more productive than an employee who is merely satisfied. While almost three quarters (71%) of organizations see the need for workplace intelligence strategies as critical to their business success over the next year, only 8 percent feel equipped to act on that need.
 
