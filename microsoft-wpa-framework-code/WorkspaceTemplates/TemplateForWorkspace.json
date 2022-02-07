@@ -1,0 +1,3547 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "hssipdemosynws1"
+		},
+		"sqlPoolName": {
+        "type": "string",
+        "metadata": "Sql Pool Name",
+        "defaultValue": "sipdemosqlpool1"
+        },
+		"syanpseDefaultStorageAccountName": {
+        "type": "string",
+        "metadata": "Storage Account Name",
+        "defaultValue": "sipdemosa"
+        },
+		"syanpseDefaultADLSFileSystemName": {
+        "type": "string",
+        "metadata": "ADLS Container Name",
+        "defaultValue": "sipdemofs"
+        },
+		"AzureSynapseAnalyticsSQLPool_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSynapseAnalyticsSQLPool'"
+		},
+		"ClassificationADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ClassificationADLS'"
+		},
+		"LinkToADOPassword": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LinkToADO'"
+		},
+		"LinkToGitPassword": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LinkToGit'"
+		},
+		"SinkADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'SinkADLS'"
+		},
+		"SourceADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'SourceADLS'"
+		},
+		"azblb_lz_csv_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'azblb_lz_csv'"
+		},
+		"azblz_wpa_lz_csv_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'azblz_wpa_lz_csv'"
+		},
+		"cz_ADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'cz_ADLS'"
+		},
+		"ls_logging_adls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_logging_adls'"
+		},
+		"ls_sqlpool_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_sqlpool'"
+		},
+		"msftfwkwpasynws-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'msftfwkwpasynws-WorkspaceDefaultSqlServer'"
+		},
+		"serverlesspool_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'serverlesspool'"
+		},
+		"ClassificationADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://msftfwkwpasa.dfs.core.windows.net"
+		},
+		"LinkToADOUrl": {
+			"type": "string",
+			"defaultValue": "https://analytics.dev.azure.com/SLLRestricted/Synapse Innovation/_odata/v3.0-preview/"
+		},
+		"LinkToADOUserName": {
+			"type": "string",
+			"defaultValue": "jon.kastner@neudesic.com"
+		},
+		"LinkToGitUrl": {
+			"type": "string",
+			"defaultValue": "https://dev.azure.com/SLLRestricted/Synapse%20Innovation/_apis/git/repositories/synapse-framework-infra/commits?api-version=6"
+		},
+		"LinkToGitUserName": {
+			"type": "string",
+			"defaultValue": "jon.kastner@neudesic.com"
+		},
+		"SinkADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://msftfwkwpasa.dfs.core.windows.net"
+		},
+		"SourceADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://neufwkwpasvca.dfs.core.windows.net"
+		},
+		"cz_ADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://msftfwkwpasa.dfs.core.windows.net"
+		},
+		"msftfwkwpasynws-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://msftfwkwpasa.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]",
+		"defaultAdlsUrl": "[concat('https://', parameters('syanpseDefaultStorageAccountName'))]",
+		"sqlPoolConnection": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=', parameters('workspaceName'), '.sql.azuresynapse.net;Initial Catalog=', parameters('sqlPoolName'))]",
+		"keyVaultUrl": "[concat('https://', parameters('keyVaultName'))]",
+		"sqlPoolConn1": "[concat('Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=', parameters('workspaceName'))]",
+		"sqlPoolConn2": "[concat('.sql.azuresynapse.net;Initial Catalog=', parameters('sqlPoolName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/', parameters('sqlPoolName')')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureSynapseAnalyticsSQLPool')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[concat(variables('sqlPoolConn1'), variables('sqlPoolConn2'))]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ClassificationADLS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[concat(variables('defaultAdlsUrl'), '.dfs.core.windows.net')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LinkToADO')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('LinkToADOUrl')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('LinkToADOUserName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LinkToADOPassword')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LinkToGit')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('LinkToGitUrl')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('LinkToGitUserName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LinkToGitPassword')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PowerBIWPA')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "PowerBIWorkspace",
+				"typeProperties": {
+					"workspaceID": "[parameters('workspaceID')]",
+					"tenantID": "[parameters('tenantID')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SinkADLS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[concat(variables('defaultAdlsUrl'), '.dfs.core.windows.net')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SourceADLS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[concat(variables('defaultAdlsUrl'), '.dfs.core.windows.net')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},		
+		{
+			"name": "[concat(parameters('workspaceName'), '/ADOUserDataSet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkToADO",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": "Users?"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LinkToADO')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ADOUserJsonData')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ClassificationADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "UserData.json",
+						"folderPath": "raw",
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"value": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"UserSK": {
+										"type": "string"
+									},
+									"UserId": {
+										"type": "string"
+									},
+									"UserName": {
+										"type": "string"
+									},
+									"UserEmail": {
+										"type": "string"
+									},
+									"AnalyticsUpdatedDate": {
+										"type": "string"
+									},
+									"GitHubUserId": {
+										"type": "null"
+									},
+									"UserType": {
+										"type": "null"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]"
+			]
+		},
+		        {
+			"name": "[concat(parameters('workspaceName'), '/ADOWorkItemJsonTest')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ClassificationADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"WorkItemType": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().WorkItemType,'Data.json')",
+							"type": "Expression"
+						},
+						"folderPath": "raw_test",
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"value": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"WorkItemId": {
+										"type": "integer"
+									},
+									"InProgressDate": {
+										"type": "string"
+									},
+									"CompletedDate": {
+										"type": "string"
+									},
+									"LeadTimeDays": {
+										"type": "number"
+									},
+									"CycleTimeDays": {
+										"type": "number"
+									},
+									"InProgressDateSK": {
+										"type": "integer"
+									},
+									"CompletedDateSK": {
+										"type": "integer"
+									},
+									"AnalyticsUpdatedDate": {
+										"type": "string"
+									},
+									"ProjectSK": {
+										"type": "string"
+									},
+									"WorkItemRevisionSK": {
+										"type": "integer"
+									},
+									"AreaSK": {
+										"type": "string"
+									},
+									"IterationSK": {
+										"type": "string"
+									},
+									"AssignedToUserSK": {
+										"type": "string"
+									},
+									"ChangedByUserSK": {
+										"type": "string"
+									},
+									"CreatedByUserSK": {
+										"type": "string"
+									},
+									"ActivatedByUserSK": {
+										"type": "string"
+									},
+									"ClosedByUserSK": {
+										"type": "string"
+									},
+									"ResolvedByUserSK": {
+										"type": "string"
+									},
+									"ActivatedDateSK": {
+										"type": "integer"
+									},
+									"ChangedDateSK": {
+										"type": "integer"
+									},
+									"ClosedDateSK": {
+										"type": "integer"
+									},
+									"CreatedDateSK": {
+										"type": "integer"
+									},
+									"ResolvedDateSK": {
+										"type": "integer"
+									},
+									"StateChangeDateSK": {
+										"type": "integer"
+									},
+									"Revision": {
+										"type": "integer"
+									},
+									"Watermark": {
+										"type": "integer"
+									},
+									"Title": {
+										"type": "string"
+									},
+									"WorkItemType": {
+										"type": "string"
+									},
+									"ChangedDate": {
+										"type": "string"
+									},
+									"CreatedDate": {
+										"type": "string"
+									},
+									"State": {
+										"type": "string"
+									},
+									"Reason": {
+										"type": "string"
+									},
+									"FoundIn": {
+										"type": "null"
+									},
+									"IntegrationBuild": {
+										"type": "null"
+									},
+									"ActivatedDate": {
+										"type": "string"
+									},
+									"Activity": {
+										"type": "null"
+									},
+									"BusinessValue": {
+										"type": "null"
+									},
+									"ClosedDate": {
+										"type": "string"
+									},
+									"Issue": {
+										"type": "null"
+									},
+									"Priority": {
+										"type": "integer"
+									},
+									"Rating": {
+										"type": "null"
+									},
+									"ResolvedDate": {
+										"type": "string"
+									},
+									"ResolvedReason": {
+										"type": "string"
+									},
+									"Risk": {
+										"type": "null"
+									},
+									"Severity": {
+										"type": "string"
+									},
+									"StackRank": {
+										"type": "null"
+									},
+									"TimeCriticality": {
+										"type": "null"
+									},
+									"ValueArea": {
+										"type": "string"
+									},
+									"CompletedWork": {
+										"type": "null"
+									},
+									"DueDate": {
+										"type": "null"
+									},
+									"Effort": {
+										"type": "null"
+									},
+									"FinishDate": {
+										"type": "null"
+									},
+									"OriginalEstimate": {
+										"type": "null"
+									},
+									"RemainingWork": {
+										"type": "null"
+									},
+									"StartDate": {
+										"type": "null"
+									},
+									"StoryPoints": {
+										"type": "null"
+									},
+									"TargetDate": {
+										"type": "null"
+									},
+									"ParentWorkItemId": {
+										"type": "integer"
+									},
+									"TagNames": {
+										"type": "null"
+									},
+									"StateCategory": {
+										"type": "string"
+									},
+									"AutomatedTestId": {
+										"type": "null"
+									},
+									"AutomatedTestName": {
+										"type": "null"
+									},
+									"AutomatedTestStorage": {
+										"type": "null"
+									},
+									"AutomatedTestType": {
+										"type": "null"
+									},
+									"AutomationStatus": {
+										"type": "null"
+									},
+									"StateChangeDate": {
+										"type": "string"
+									},
+									"Count": {
+										"type": "integer"
+									},
+									"CommentCount": {
+										"type": "integer"
+									},
+									"Microsoft_VSTS_CodeReview_AcceptedBySK": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_AcceptedDate": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosedStatus": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosedStatusCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosingComment": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_Context": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextOwner": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Common_ReviewedBySK": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Common_StateCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Feedback_ApplicationType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_TCM_TestSuiteType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_TCM_TestSuiteTypeId": {
+										"type": "null"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/GitJsonDataADOTest')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ClassificationADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "GitData.json",
+						"folderPath": "raw_test",
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"value": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"commitId": {
+										"type": "string"
+									},
+									"author": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"email": {
+												"type": "string"
+											},
+											"date": {
+												"type": "string"
+											}
+										}
+									},
+									"committer": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"email": {
+												"type": "string"
+											},
+											"date": {
+												"type": "string"
+											}
+										}
+									},
+									"comment": {
+										"type": "string"
+									},
+									"changeCounts": {
+										"type": "object",
+										"properties": {
+											"Add": {
+												"type": "integer"
+											},
+											"Edit": {
+												"type": "integer"
+											},
+											"Delete": {
+												"type": "integer"
+											}
+										}
+									},
+									"url": {
+										"type": "string"
+									},
+									"remoteUrl": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ADOUserJsonDataTest')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ClassificationADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "UserData.json",
+						"folderPath": "raw_test",
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"value": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"UserSK": {
+										"type": "string"
+									},
+									"UserId": {
+										"type": "string"
+									},
+									"UserName": {
+										"type": "string"
+									},
+									"UserEmail": {
+										"type": "string"
+									},
+									"AnalyticsUpdatedDate": {
+										"type": "string"
+									},
+									"GitHubUserId": {
+										"type": "null"
+									},
+									"UserType": {
+										"type": "null"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ADOWorkItemJson')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ClassificationADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"WorkItemType": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().WorkItemType,'Data.json')",
+							"type": "Expression"
+						},
+						"folderPath": "raw",
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"value": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"WorkItemId": {
+										"type": "integer"
+									},
+									"InProgressDate": {
+										"type": "string"
+									},
+									"CompletedDate": {
+										"type": "string"
+									},
+									"LeadTimeDays": {
+										"type": "number"
+									},
+									"CycleTimeDays": {
+										"type": "number"
+									},
+									"InProgressDateSK": {
+										"type": "integer"
+									},
+									"CompletedDateSK": {
+										"type": "integer"
+									},
+									"AnalyticsUpdatedDate": {
+										"type": "string"
+									},
+									"ProjectSK": {
+										"type": "string"
+									},
+									"WorkItemRevisionSK": {
+										"type": "integer"
+									},
+									"AreaSK": {
+										"type": "string"
+									},
+									"IterationSK": {
+										"type": "string"
+									},
+									"AssignedToUserSK": {
+										"type": "string"
+									},
+									"ChangedByUserSK": {
+										"type": "string"
+									},
+									"CreatedByUserSK": {
+										"type": "string"
+									},
+									"ActivatedByUserSK": {
+										"type": "string"
+									},
+									"ClosedByUserSK": {
+										"type": "string"
+									},
+									"ResolvedByUserSK": {
+										"type": "string"
+									},
+									"ActivatedDateSK": {
+										"type": "integer"
+									},
+									"ChangedDateSK": {
+										"type": "integer"
+									},
+									"ClosedDateSK": {
+										"type": "integer"
+									},
+									"CreatedDateSK": {
+										"type": "integer"
+									},
+									"ResolvedDateSK": {
+										"type": "integer"
+									},
+									"StateChangeDateSK": {
+										"type": "integer"
+									},
+									"Revision": {
+										"type": "integer"
+									},
+									"Watermark": {
+										"type": "integer"
+									},
+									"Title": {
+										"type": "string"
+									},
+									"WorkItemType": {
+										"type": "string"
+									},
+									"ChangedDate": {
+										"type": "string"
+									},
+									"CreatedDate": {
+										"type": "string"
+									},
+									"State": {
+										"type": "string"
+									},
+									"Reason": {
+										"type": "string"
+									},
+									"FoundIn": {
+										"type": "null"
+									},
+									"IntegrationBuild": {
+										"type": "null"
+									},
+									"ActivatedDate": {
+										"type": "string"
+									},
+									"Activity": {
+										"type": "null"
+									},
+									"BusinessValue": {
+										"type": "null"
+									},
+									"ClosedDate": {
+										"type": "string"
+									},
+									"Issue": {
+										"type": "null"
+									},
+									"Priority": {
+										"type": "integer"
+									},
+									"Rating": {
+										"type": "null"
+									},
+									"ResolvedDate": {
+										"type": "string"
+									},
+									"ResolvedReason": {
+										"type": "string"
+									},
+									"Risk": {
+										"type": "null"
+									},
+									"Severity": {
+										"type": "string"
+									},
+									"StackRank": {
+										"type": "null"
+									},
+									"TimeCriticality": {
+										"type": "null"
+									},
+									"ValueArea": {
+										"type": "string"
+									},
+									"CompletedWork": {
+										"type": "null"
+									},
+									"DueDate": {
+										"type": "null"
+									},
+									"Effort": {
+										"type": "null"
+									},
+									"FinishDate": {
+										"type": "null"
+									},
+									"OriginalEstimate": {
+										"type": "null"
+									},
+									"RemainingWork": {
+										"type": "null"
+									},
+									"StartDate": {
+										"type": "null"
+									},
+									"StoryPoints": {
+										"type": "null"
+									},
+									"TargetDate": {
+										"type": "null"
+									},
+									"ParentWorkItemId": {
+										"type": "integer"
+									},
+									"TagNames": {
+										"type": "null"
+									},
+									"StateCategory": {
+										"type": "string"
+									},
+									"AutomatedTestId": {
+										"type": "null"
+									},
+									"AutomatedTestName": {
+										"type": "null"
+									},
+									"AutomatedTestStorage": {
+										"type": "null"
+									},
+									"AutomatedTestType": {
+										"type": "null"
+									},
+									"AutomationStatus": {
+										"type": "null"
+									},
+									"StateChangeDate": {
+										"type": "string"
+									},
+									"Count": {
+										"type": "integer"
+									},
+									"CommentCount": {
+										"type": "integer"
+									},
+									"Microsoft_VSTS_CodeReview_AcceptedBySK": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_AcceptedDate": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosedStatus": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosedStatusCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosingComment": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_Context": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextOwner": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Common_ReviewedBySK": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Common_StateCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Feedback_ApplicationType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_TCM_TestSuiteType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_TCM_TestSuiteTypeId": {
+										"type": "null"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ActivityMasterData')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalyticsSQLPool",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "ActivityId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ActivityName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ActivityDescription",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ActivityTypeId",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Activity"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureSynapseAnalyticsSQLPool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DevOpsJson')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SourceADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						},
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SourceADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DevOpsSource')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SourceADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					" FolderPath": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset(). FolderPath",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"@odata.context": {
+							"type": "string"
+						},
+						"vsts.warnings@odata.type": {
+							"type": "string"
+						},
+						"@vsts.warnings": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"value": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"WorkItemId": {
+										"type": "integer"
+									},
+									"InProgressDate": {
+										"type": "null"
+									},
+									"CompletedDate": {
+										"type": "null"
+									},
+									"LeadTimeDays": {
+										"type": "null"
+									},
+									"CycleTimeDays": {
+										"type": "null"
+									},
+									"InProgressDateSK": {
+										"type": "null"
+									},
+									"CompletedDateSK": {
+										"type": "null"
+									},
+									"AnalyticsUpdatedDate": {
+										"type": "string"
+									},
+									"ProjectSK": {
+										"type": "string"
+									},
+									"WorkItemRevisionSK": {
+										"type": "integer"
+									},
+									"AreaSK": {
+										"type": "string"
+									},
+									"IterationSK": {
+										"type": "string"
+									},
+									"AssignedToUserSK": {
+										"type": "string"
+									},
+									"ChangedByUserSK": {
+										"type": "string"
+									},
+									"CreatedByUserSK": {
+										"type": "string"
+									},
+									"ActivatedByUserSK": {
+										"type": "string"
+									},
+									"ClosedByUserSK": {
+										"type": "null"
+									},
+									"ResolvedByUserSK": {
+										"type": "null"
+									},
+									"ActivatedDateSK": {
+										"type": "integer"
+									},
+									"ChangedDateSK": {
+										"type": "integer"
+									},
+									"ClosedDateSK": {
+										"type": "null"
+									},
+									"CreatedDateSK": {
+										"type": "integer"
+									},
+									"ResolvedDateSK": {
+										"type": "null"
+									},
+									"StateChangeDateSK": {
+										"type": "integer"
+									},
+									"Revision": {
+										"type": "integer"
+									},
+									"Watermark": {
+										"type": "integer"
+									},
+									"Title": {
+										"type": "string"
+									},
+									"WorkItemType": {
+										"type": "string"
+									},
+									"ChangedDate": {
+										"type": "string"
+									},
+									"CreatedDate": {
+										"type": "string"
+									},
+									"State": {
+										"type": "string"
+									},
+									"Reason": {
+										"type": "string"
+									},
+									"FoundIn": {
+										"type": "null"
+									},
+									"IntegrationBuild": {
+										"type": "null"
+									},
+									"ActivatedDate": {
+										"type": "string"
+									},
+									"Activity": {
+										"type": "null"
+									},
+									"BusinessValue": {
+										"type": "null"
+									},
+									"ClosedDate": {
+										"type": "null"
+									},
+									"Issue": {
+										"type": "null"
+									},
+									"Priority": {
+										"type": "integer"
+									},
+									"Rating": {
+										"type": "null"
+									},
+									"ResolvedDate": {
+										"type": "null"
+									},
+									"ResolvedReason": {
+										"type": "null"
+									},
+									"Risk": {
+										"type": "null"
+									},
+									"Severity": {
+										"type": "null"
+									},
+									"StackRank": {
+										"type": "null"
+									},
+									"TimeCriticality": {
+										"type": "null"
+									},
+									"ValueArea": {
+										"type": "null"
+									},
+									"CompletedWork": {
+										"type": "null"
+									},
+									"DueDate": {
+										"type": "null"
+									},
+									"Effort": {
+										"type": "null"
+									},
+									"FinishDate": {
+										"type": "null"
+									},
+									"OriginalEstimate": {
+										"type": "null"
+									},
+									"RemainingWork": {
+										"type": "null"
+									},
+									"StartDate": {
+										"type": "null"
+									},
+									"StoryPoints": {
+										"type": "null"
+									},
+									"TargetDate": {
+										"type": "null"
+									},
+									"ParentWorkItemId": {
+										"type": "null"
+									},
+									"TagNames": {
+										"type": "null"
+									},
+									"StateCategory": {
+										"type": "null"
+									},
+									"AutomatedTestId": {
+										"type": "null"
+									},
+									"AutomatedTestName": {
+										"type": "null"
+									},
+									"AutomatedTestStorage": {
+										"type": "null"
+									},
+									"AutomatedTestType": {
+										"type": "null"
+									},
+									"AutomationStatus": {
+										"type": "null"
+									},
+									"StateChangeDate": {
+										"type": "string"
+									},
+									"Count": {
+										"type": "integer"
+									},
+									"CommentCount": {
+										"type": "integer"
+									},
+									"Microsoft_VSTS_CodeReview_AcceptedBySK": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_AcceptedDate": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosedStatus": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosedStatusCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ClosingComment": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_Context": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextOwner": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_CodeReview_ContextType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Common_ReviewedBySK": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Common_StateCode": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_Feedback_ApplicationType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_TCM_TestSuiteType": {
+										"type": "null"
+									},
+									"Microsoft_VSTS_TCM_TestSuiteTypeId": {
+										"type": "null"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SourceADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/EmployeeActivityDataSet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalyticsSQLPool",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "EmployeeId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ActivityId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Date",
+						"type": "date"
+					},
+					{
+						"name": "DateKey",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ActivityValue",
+						"type": "float",
+						"precision": 15
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "EmployeeActivity"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureSynapseAnalyticsSQLPool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/EmployeeActivityDataSink')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalyticsSQLPool",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "EmployeeId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ActivityId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "Date",
+						"type": "date"
+					},
+					{
+						"name": "DateKey",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ActivityValue",
+						"type": "float",
+						"precision": 15
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "EmployeeActivity"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureSynapseAnalyticsSQLPool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/EmployeeMasterDataSet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSynapseAnalyticsSQLPool",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "EmployeeId",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "WPAEmployeeId",
+						"type": "nvarchar"
+					},
+					{
+						"name": "WPAEmployeeName",
+						"type": "nvarchar"
+					},
+					{
+						"name": "EmployeeHireDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "Organization",
+						"type": "nvarchar"
+					},
+					{
+						"name": "LevelDesignation",
+						"type": "nvarchar"
+					},
+					{
+						"name": "FunctionType",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Region",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Layer",
+						"type": "nvarchar"
+					},
+					{
+						"name": "IsInternal",
+						"type": "nvarchar"
+					},
+					{
+						"name": "SupervisorIndicator",
+						"type": "nvarchar"
+					},
+					{
+						"name": "Number_of_directs",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADOUserSK",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADOUserId",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADOUserEmail",
+						"type": "nvarchar"
+					},
+					{
+						"name": "ADOUserName",
+						"type": "nvarchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Employee"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/AzureSynapseAnalyticsSQLPool')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/GetGItJsonData')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkToGit",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LinkToGit')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/GitJsonDataADO')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ClassificationADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "GitData.json",
+						"folderPath": "raw",
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"value": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"commitId": {
+										"type": "string"
+									},
+									"author": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"email": {
+												"type": "string"
+											},
+											"date": {
+												"type": "string"
+											}
+										}
+									},
+									"committer": {
+										"type": "object",
+										"properties": {
+											"name": {
+												"type": "string"
+											},
+											"email": {
+												"type": "string"
+											},
+											"date": {
+												"type": "string"
+											}
+										}
+									},
+									"comment": {
+										"type": "string"
+									},
+									"changeCounts": {
+										"type": "object",
+										"properties": {
+											"Add": {
+												"type": "integer"
+											},
+											"Edit": {
+												"type": "integer"
+											},
+											"Delete": {
+												"type": "integer"
+											}
+										}
+									},
+									"url": {
+										"type": "string"
+									},
+									"remoteUrl": {
+										"type": "string"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LoadADOBugs')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ClassificationADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/LoadADOWorkItems')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkToADO",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"WorkItem": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": {
+						"value": "@concat('WorkItems?&$filter=WorkItemType eq ','''',dataset().WorkItem,'''')",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/LinkToADO')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WPADataFile')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SourceADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						},
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "PersonId",
+						"type": "String"
+					},
+					{
+						"name": "Date",
+						"type": "String"
+					},
+					{
+						"name": "Emails_sent_to_50_or_more_recipients",
+						"type": "String"
+					},
+					{
+						"name": "Emails_sent_11_to_50_recipients",
+						"type": "String"
+					},
+					{
+						"name": "Emails_sent_6_to_10_recipients",
+						"type": "String"
+					},
+					{
+						"name": "Emails_sent_2_to_5_recipients",
+						"type": "String"
+					},
+					{
+						"name": "Emails_sent_1_recipient",
+						"type": "String"
+					},
+					{
+						"name": "All_hands_recurring_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Workshop_recurring_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Bloated_recurring_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Lengthy_recurring_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Status_update_recurring_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Decision_making_recurring_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "One_on_one_recurring_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Total_unscheduled_calls",
+						"type": "String"
+					},
+					{
+						"name": "Total_scheduled_calls",
+						"type": "String"
+					},
+					{
+						"name": "Working_hours_in_unscheduled_calls",
+						"type": "String"
+					},
+					{
+						"name": "Working_hours_in_scheduled_calls",
+						"type": "String"
+					},
+					{
+						"name": "After_hours_in_unscheduled_calls",
+						"type": "String"
+					},
+					{
+						"name": "After_hours_in_scheduled_calls",
+						"type": "String"
+					},
+					{
+						"name": "Unscheduled_Call_hours",
+						"type": "String"
+					},
+					{
+						"name": "Scheduled_Call_hours",
+						"type": "String"
+					},
+					{
+						"name": "Recurring_or_regular_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Status_update_review_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "All_hands_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Workshop_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Bloated_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Lengthy_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Status_update_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Decision_making_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "One_on_one_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_more_than_2_hours",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_1_to_2_hours",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_1_hour",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_31_to_59_min",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_30_min_or_less",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_for_19_or_more_attendees",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_for_9_to_18_attendees",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_for_3_to_8_attendees",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_for_2_attendees",
+						"type": "String"
+					},
+					{
+						"name": "Workweek_span",
+						"type": "String"
+					},
+					{
+						"name": "Working_hours_instant_messages",
+						"type": "String"
+					},
+					{
+						"name": "Working_hours_in_calls",
+						"type": "String"
+					},
+					{
+						"name": "Working_hours_email_hours",
+						"type": "String"
+					},
+					{
+						"name": "Working_hours_collaboration_hours",
+						"type": "String"
+					},
+					{
+						"name": "Total_focus_hours",
+						"type": "String"
+					},
+					{
+						"name": "Total_emails_sent_during_meeting",
+						"type": "String"
+					},
+					{
+						"name": "Total_calls",
+						"type": "String"
+					},
+					{
+						"name": "Time_in_self_organized_meetings",
+						"type": "String"
+					},
+					{
+						"name": "Redundant_meeting_hours__organizational_",
+						"type": "String"
+					},
+					{
+						"name": "Redundant_meeting_hours__lower_level_",
+						"type": "String"
+					},
+					{
+						"name": "Open_2_hour_blocks",
+						"type": "String"
+					},
+					{
+						"name": "Open_1_hour_block",
+						"type": "String"
+					},
+					{
+						"name": "Networking_outside_organization",
+						"type": "String"
+					},
+					{
+						"name": "Networking_outside_company",
+						"type": "String"
+					},
+					{
+						"name": "Multitasking_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Meetings_with_skip_level",
+						"type": "String"
+					},
+					{
+						"name": "Meetings_with_manager_1_on_1",
+						"type": "String"
+					},
+					{
+						"name": "Meetings_with_manager",
+						"type": "String"
+					},
+					{
+						"name": "Meetings",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_with_skip_level",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_with_manager_1_on_1",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_with_manager",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours_during_working_hours",
+						"type": "String"
+					},
+					{
+						"name": "Meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Manager_coaching_hours_1_on_1",
+						"type": "String"
+					},
+					{
+						"name": "Low_quality_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Internal_network_size",
+						"type": "String"
+					},
+					{
+						"name": "Instant_messages_sent",
+						"type": "String"
+					},
+					{
+						"name": "Instant_message_hours",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_meetings_organized",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_meeting_attendees",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_instant_messages_recipients",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_instant_messages_hours",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_email_recipients",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_email_hours",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_calls_organized",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_call_participants",
+						"type": "String"
+					},
+					{
+						"name": "Generated_workload_call_hours",
+						"type": "String"
+					},
+					{
+						"name": "External_network_size",
+						"type": "String"
+					},
+					{
+						"name": "Emails_sent",
+						"type": "String"
+					},
+					{
+						"name": "Email_hours",
+						"type": "String"
+					},
+					{
+						"name": "Conflicting_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "Collaboration_hours_external",
+						"type": "String"
+					},
+					{
+						"name": "Collaboration_hrs",
+						"type": "String"
+					},
+					{
+						"name": "Call_hours",
+						"type": "String"
+					},
+					{
+						"name": "After_hours_meeting_hours",
+						"type": "String"
+					},
+					{
+						"name": "After_hours_instant_messages",
+						"type": "String"
+					},
+					{
+						"name": "After_hours_in_calls",
+						"type": "String"
+					},
+					{
+						"name": "After_hours_email_hours",
+						"type": "String"
+					},
+					{
+						"name": "After_hours_collaboration_hours",
+						"type": "String"
+					},
+					{
+						"name": "Organization",
+						"type": "String"
+					},
+					{
+						"name": "LevelDesignation",
+						"type": "String"
+					},
+					{
+						"name": "Domain",
+						"type": "String"
+					},
+					{
+						"name": "FunctionType",
+						"type": "String"
+					},
+					{
+						"name": "Layer",
+						"type": "String"
+					},
+					{
+						"name": "Region",
+						"type": "String"
+					},
+					{
+						"name": "zId",
+						"type": "String"
+					},
+					{
+						"name": "HireDate",
+						"type": "String"
+					},
+					{
+						"name": "attainment",
+						"type": "String"
+					},
+					{
+						"name": "SupervisorIndicator",
+						"type": "String"
+					},
+					{
+						"name": "Number_of_directs",
+						"type": "String"
+					},
+					{
+						"name": "TimeZone",
+						"type": "String"
+					},
+					{
+						"name": "HourlyRate",
+						"type": "String"
+					},
+					{
+						"name": "IsInternal",
+						"type": "String"
+					},
+					{
+						"name": "IsActive",
+						"type": "String"
+					},
+					{
+						"name": "WorkingStartTimeSetInOutlook",
+						"type": "String"
+					},
+					{
+						"name": "WorkingEndTimeSetInOutlook",
+						"type": "String"
+					},
+					{
+						"name": "WorkingDaysSetInOutlook",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SourceADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WPADataFile_CZ')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SinkADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderName": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderName",
+							"type": "Expression"
+						},
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "UserId",
+						"type": "String"
+					},
+					{
+						"name": "UserName",
+						"type": "String"
+					},
+					{
+						"name": "UserSK",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SinkADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WPADataFile_RZ')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SinkADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					},
+					"FolderName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderName",
+							"type": "Expression"
+						},
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Email",
+						"type": "String"
+					},
+					{
+						"name": "UserId",
+						"type": "String"
+					},
+					{
+						"name": "UserName",
+						"type": "String"
+					},
+					{
+						"name": "UserSK",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SinkADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WPAExtractedDataset')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SinkADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "wpa.csv",
+						"folderPath": "wpa",
+						"fileSystem": "landing"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SinkADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WPAJsonData')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SinkADLS",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FolderPath": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().FolderPath",
+							"type": "Expression"
+						},
+						"fileSystem": "[parameters('syanpseDefaultADLSFileSystemName')]"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/SinkADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WPAODataResource')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "WPADemoOData",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "ODataResource",
+				"schema": [],
+				"typeProperties": {
+					"path": "Persons"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/WPADemoOData')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/TransformADOData')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ADOWorkItemJsonTest",
+								"type": "DatasetReference"
+							},
+							"name": "ADOBugsJson"
+						},
+						{
+							"dataset": {
+								"referenceName": "ADOWorkItemJsonTest",
+								"type": "DatasetReference"
+							},
+							"name": "ADOTasksJsonData"
+						},
+						{
+							"dataset": {
+								"referenceName": "ADOWorkItemJsonTest",
+								"type": "DatasetReference"
+							},
+							"name": "ADOFeaturesJsonData"
+						},
+						{
+							"dataset": {
+								"referenceName": "ADOWorkItemJsonTest",
+								"type": "DatasetReference"
+							},
+							"name": "ADOUserStoryJsonData"
+						},
+						{
+							"dataset": {
+								"referenceName": "GitJsonDataADOTest",
+								"type": "DatasetReference"
+							},
+							"name": "ADOGitJsonData"
+						},
+						{
+							"dataset": {
+								"referenceName": "ADOUserJsonDataTest",
+								"type": "DatasetReference"
+							},
+							"name": "ADOUserData"
+						},
+						{
+							"dataset": {
+								"referenceName": "ActivityMasterData",
+								"type": "DatasetReference"
+							},
+							"name": "ActivityData"
+						},
+						{
+							"dataset": {
+								"referenceName": "EmployeeMasterDataSet",
+								"type": "DatasetReference"
+							},
+							"name": "EmployeeData"
+						},
+						{
+							"dataset": {
+								"referenceName": "EmployeeActivityDataSet",
+								"type": "DatasetReference"
+							},
+							"name": "EmployeeActvityData"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "EmployeeActivityDataSink",
+								"type": "DatasetReference"
+							},
+							"name": "UpdateValuesToEmployeeActivtyTable"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Flattenthevauearray"
+						},
+						{
+							"name": "FlattenTheTaskValueArray"
+						},
+						{
+							"name": "FlattenTheFeatureValueArray"
+						},
+						{
+							"name": "FlattenTheUserStoryValueArray"
+						},
+						{
+							"name": "UnpivotBugs"
+						},
+						{
+							"name": "FlattenTGeGItJson"
+						},
+						{
+							"name": "FLattenTheADOUserJsonData"
+						},
+						{
+							"name": "Join1"
+						},
+						{
+							"name": "Select1"
+						},
+						{
+							"name": "UnpivotGitData"
+						},
+						{
+							"name": "UnpivotTasks"
+						},
+						{
+							"name": "UnpivotFeatures"
+						},
+						{
+							"name": "UnpivotUserStory"
+						},
+						{
+							"name": "CombineAllWorkItems"
+						},
+						{
+							"name": "FilterOutAlltheNullValues"
+						},
+						{
+							"name": "DerivedColumn1"
+						},
+						{
+							"name": "ExtractActivityID"
+						},
+						{
+							"name": "SelectWIthActivityID"
+						},
+						{
+							"name": "SelectEmployeeIDAndUserSK"
+						},
+						{
+							"name": "JoinWithEmployee"
+						},
+						{
+							"name": "SelectTheRequiredColumns"
+						},
+						{
+							"name": "UpdatetheEmplyeeActivityTable"
+						},
+						{
+							"name": "Sort1"
+						},
+						{
+							"name": "AggregateTheActivityValueForBugs"
+						},
+						{
+							"name": "AlterRow1"
+						},
+						{
+							"name": "AggregateTheActivityValueForTasks"
+						},
+						{
+							"name": "AggregateTheActivityValueForFeatures"
+						},
+						{
+							"name": "AggregateTheActivityValueForUserStory"
+						},
+						{
+							"name": "AggregateTheActivityValueForGit"
+						},
+						{
+							"name": "ConvertActivatedDateToDate"
+						},
+						{
+							"name": "ConvertActivateDateToDate"
+						},
+						{
+							"name": "ConvertFeatureActivateDateToDate"
+						},
+						{
+							"name": "ConvertUserStoryActivatedDateToDate"
+						},
+						{
+							"name": "ConvertTheGItActivatedDateToDate"
+						}
+					],
+					"script": "source(output(\n\t\tvalue as (WorkItemId as string, InProgressDate as string, CompletedDate as string, LeadTimeDays as double, CycleTimeDays as double, InProgressDateSK as string, CompletedDateSK as string, AnalyticsUpdatedDate as string, ProjectSK as string, WorkItemRevisionSK as string, AreaSK as string, IterationSK as string, AssignedToUserSK as string, ChangedByUserSK as string, CreatedByUserSK as string, ActivatedByUserSK as string, ClosedByUserSK as string, ResolvedByUserSK as string, ActivatedDateSK as string, ChangedDateSK as string, ClosedDateSK as string, CreatedDateSK as string, ResolvedDateSK as string, StateChangeDateSK as string, Revision as string, Watermark as string, Title as string, WorkItemType as string, ChangedDate as string, CreatedDate as string, State as string, Reason as string, FoundIn as string, IntegrationBuild as string, ActivatedDate as string, Activity as string, BusinessValue as string, ClosedDate as string, Issue as string, Priority as string, Rating as string, ResolvedDate as string, ResolvedReason as string, Risk as string, Severity as string, StackRank as string, TimeCriticality as string, ValueArea as string, CompletedWork as string, DueDate as string, Effort as string, FinishDate as string, OriginalEstimate as string, RemainingWork as string, StartDate as string, StoryPoints as string, TargetDate as string, ParentWorkItemId as string, TagNames as string, StateCategory as string, AutomatedTestId as string, AutomatedTestName as string, AutomatedTestStorage as string, AutomatedTestType as string, AutomationStatus as string, StateChangeDate as string, Count as string, CommentCount as string, Microsoft_VSTS_CodeReview_AcceptedBySK as string, Microsoft_VSTS_CodeReview_AcceptedDate as string, Microsoft_VSTS_CodeReview_ClosedStatus as string, Microsoft_VSTS_CodeReview_ClosedStatusCode as string, Microsoft_VSTS_CodeReview_ClosingComment as string, Microsoft_VSTS_CodeReview_Context as string, Microsoft_VSTS_CodeReview_ContextCode as string, Microsoft_VSTS_CodeReview_ContextOwner as string, Microsoft_VSTS_CodeReview_ContextType as string, Microsoft_VSTS_Common_ReviewedBySK as string, Microsoft_VSTS_Common_StateCode as string, Microsoft_VSTS_Feedback_ApplicationType as string, Microsoft_VSTS_TCM_TestSuiteType as string, Microsoft_VSTS_TCM_TestSuiteTypeId as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine',\n\tpartitionBy('hash', 1)) ~> ADOBugsJson\nsource(output(\n\t\tvalue as (WorkItemId as string, InProgressDate as string, CompletedDate as string, LeadTimeDays as double, CycleTimeDays as double, InProgressDateSK as string, CompletedDateSK as string, AnalyticsUpdatedDate as string, ProjectSK as string, WorkItemRevisionSK as string, AreaSK as string, IterationSK as string, AssignedToUserSK as string, ChangedByUserSK as string, CreatedByUserSK as string, ActivatedByUserSK as string, ClosedByUserSK as string, ResolvedByUserSK as string, ActivatedDateSK as string, ChangedDateSK as string, ClosedDateSK as string, CreatedDateSK as string, ResolvedDateSK as string, StateChangeDateSK as string, Revision as string, Watermark as string, Title as string, WorkItemType as string, ChangedDate as string, CreatedDate as string, State as string, Reason as string, FoundIn as string, IntegrationBuild as string, ActivatedDate as string, Activity as string, BusinessValue as string, ClosedDate as string, Issue as string, Priority as string, Rating as string, ResolvedDate as string, ResolvedReason as string, Risk as string, Severity as string, StackRank as string, TimeCriticality as string, ValueArea as string, CompletedWork as string, DueDate as string, Effort as string, FinishDate as string, OriginalEstimate as string, RemainingWork as string, StartDate as string, StoryPoints as string, TargetDate as string, ParentWorkItemId as string, TagNames as string, StateCategory as string, AutomatedTestId as string, AutomatedTestName as string, AutomatedTestStorage as string, AutomatedTestType as string, AutomationStatus as string, StateChangeDate as string, Count as string, CommentCount as string, Microsoft_VSTS_CodeReview_AcceptedBySK as string, Microsoft_VSTS_CodeReview_AcceptedDate as string, Microsoft_VSTS_CodeReview_ClosedStatus as string, Microsoft_VSTS_CodeReview_ClosedStatusCode as string, Microsoft_VSTS_CodeReview_ClosingComment as string, Microsoft_VSTS_CodeReview_Context as string, Microsoft_VSTS_CodeReview_ContextCode as string, Microsoft_VSTS_CodeReview_ContextOwner as string, Microsoft_VSTS_CodeReview_ContextType as string, Microsoft_VSTS_Common_ReviewedBySK as string, Microsoft_VSTS_Common_StateCode as string, Microsoft_VSTS_Feedback_ApplicationType as string, Microsoft_VSTS_TCM_TestSuiteType as string, Microsoft_VSTS_TCM_TestSuiteTypeId as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine',\n\tpartitionBy('hash', 1)) ~> ADOTasksJsonData\nsource(output(\n\t\tvalue as (WorkItemId as string, InProgressDate as string, CompletedDate as string, LeadTimeDays as double, CycleTimeDays as double, InProgressDateSK as string, CompletedDateSK as string, AnalyticsUpdatedDate as string, ProjectSK as string, WorkItemRevisionSK as string, AreaSK as string, IterationSK as string, AssignedToUserSK as string, ChangedByUserSK as string, CreatedByUserSK as string, ActivatedByUserSK as string, ClosedByUserSK as string, ResolvedByUserSK as string, ActivatedDateSK as string, ChangedDateSK as string, ClosedDateSK as string, CreatedDateSK as string, ResolvedDateSK as string, StateChangeDateSK as string, Revision as string, Watermark as string, Title as string, WorkItemType as string, ChangedDate as string, CreatedDate as string, State as string, Reason as string, FoundIn as string, IntegrationBuild as string, ActivatedDate as string, Activity as string, BusinessValue as string, ClosedDate as string, Issue as string, Priority as string, Rating as string, ResolvedDate as string, ResolvedReason as string, Risk as string, Severity as string, StackRank as string, TimeCriticality as string, ValueArea as string, CompletedWork as string, DueDate as string, Effort as string, FinishDate as string, OriginalEstimate as string, RemainingWork as string, StartDate as string, StoryPoints as string, TargetDate as string, ParentWorkItemId as string, TagNames as string, StateCategory as string, AutomatedTestId as string, AutomatedTestName as string, AutomatedTestStorage as string, AutomatedTestType as string, AutomationStatus as string, StateChangeDate as string, Count as string, CommentCount as string, Microsoft_VSTS_CodeReview_AcceptedBySK as string, Microsoft_VSTS_CodeReview_AcceptedDate as string, Microsoft_VSTS_CodeReview_ClosedStatus as string, Microsoft_VSTS_CodeReview_ClosedStatusCode as string, Microsoft_VSTS_CodeReview_ClosingComment as string, Microsoft_VSTS_CodeReview_Context as string, Microsoft_VSTS_CodeReview_ContextCode as string, Microsoft_VSTS_CodeReview_ContextOwner as string, Microsoft_VSTS_CodeReview_ContextType as string, Microsoft_VSTS_Common_ReviewedBySK as string, Microsoft_VSTS_Common_StateCode as string, Microsoft_VSTS_Feedback_ApplicationType as string, Microsoft_VSTS_TCM_TestSuiteType as string, Microsoft_VSTS_TCM_TestSuiteTypeId as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine',\n\tpartitionBy('hash', 1)) ~> ADOFeaturesJsonData\nsource(output(\n\t\tvalue as (WorkItemId as string, InProgressDate as string, CompletedDate as string, LeadTimeDays as double, CycleTimeDays as double, InProgressDateSK as string, CompletedDateSK as string, AnalyticsUpdatedDate as string, ProjectSK as string, WorkItemRevisionSK as string, AreaSK as string, IterationSK as string, AssignedToUserSK as string, ChangedByUserSK as string, CreatedByUserSK as string, ActivatedByUserSK as string, ClosedByUserSK as string, ResolvedByUserSK as string, ActivatedDateSK as string, ChangedDateSK as string, ClosedDateSK as string, CreatedDateSK as string, ResolvedDateSK as string, StateChangeDateSK as string, Revision as string, Watermark as string, Title as string, WorkItemType as string, ChangedDate as string, CreatedDate as string, State as string, Reason as string, FoundIn as string, IntegrationBuild as string, ActivatedDate as string, Activity as string, BusinessValue as string, ClosedDate as string, Issue as string, Priority as string, Rating as string, ResolvedDate as string, ResolvedReason as string, Risk as string, Severity as string, StackRank as string, TimeCriticality as string, ValueArea as string, CompletedWork as string, DueDate as string, Effort as string, FinishDate as string, OriginalEstimate as string, RemainingWork as string, StartDate as string, StoryPoints as string, TargetDate as string, ParentWorkItemId as string, TagNames as string, StateCategory as string, AutomatedTestId as string, AutomatedTestName as string, AutomatedTestStorage as string, AutomatedTestType as string, AutomationStatus as string, StateChangeDate as string, Count as string, CommentCount as string, Microsoft_VSTS_CodeReview_AcceptedBySK as string, Microsoft_VSTS_CodeReview_AcceptedDate as string, Microsoft_VSTS_CodeReview_ClosedStatus as string, Microsoft_VSTS_CodeReview_ClosedStatusCode as string, Microsoft_VSTS_CodeReview_ClosingComment as string, Microsoft_VSTS_CodeReview_Context as string, Microsoft_VSTS_CodeReview_ContextCode as string, Microsoft_VSTS_CodeReview_ContextOwner as string, Microsoft_VSTS_CodeReview_ContextType as string, Microsoft_VSTS_Common_ReviewedBySK as string, Microsoft_VSTS_Common_StateCode as string, Microsoft_VSTS_Feedback_ApplicationType as string, Microsoft_VSTS_TCM_TestSuiteType as string, Microsoft_VSTS_TCM_TestSuiteTypeId as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine') ~> ADOUserStoryJsonData\nsource(output(\n\t\tvalue as (commitId as string, author as (name as string, email as string, date as string), committer as (name as string, email as string, date as string), comment as string, changeCounts as (Add as string, Edit as string, Delete as string), url as string, remoteUrl as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine',\n\tpartitionBy('hash', 1)) ~> ADOGitJsonData\nsource(output(\n\t\tvalue as (UserSK as string, UserId as string, UserName as string, UserEmail as string, AnalyticsUpdatedDate as string, GitHubUserId as string, UserType as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine',\n\tpartitionBy('hash', 1)) ~> ADOUserData\nsource(output(\n\t\tActivityId as integer,\n\t\tActivityName as string,\n\t\tActivityDescription as string,\n\t\tActivityTypeId as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false,\n\tpartitionBy('hash', 1)) ~> ActivityData\nsource(output(\n\t\tEmployeeId as integer,\n\t\tWPAEmployeeId as string,\n\t\tWPAEmployeeName as string,\n\t\tEmployeeHireDate as timestamp,\n\t\tOrganization as string,\n\t\tLevelDesignation as string,\n\t\tFunctionType as string,\n\t\tRegion as string,\n\t\tLayer as string,\n\t\tIsInternal as string,\n\t\tSupervisorIndicator as string,\n\t\tNumber_of_directs as string,\n\t\tADOUserSK as string,\n\t\tADOUserId as string,\n\t\tADOUserEmail as string,\n\t\tADOUserName as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false,\n\tpartitionBy('hash', 1)) ~> EmployeeData\nsource(output(\n\t\tEmployeeId as integer,\n\t\tActivityId as integer,\n\t\tDate as date,\n\t\tDateKey as integer,\n\t\tActivityValue as double\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table',\n\tstaged: false,\n\tpartitionBy('hash', 1)) ~> EmployeeActvityData\nADOBugsJson foldDown(unroll(value),\n\tmapColumn(\n\t\tAssignedToUserSK = value.AssignedToUserSK,\n\t\tActivatedDate = value.ActivatedDate,\n\t\tBug_Count = value.Count\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flattenthevauearray\nADOTasksJsonData foldDown(unroll(value),\n\tmapColumn(\n\t\tAssignedToUserSK = value.AssignedToUserSK,\n\t\tActivatedDate = value.ActivatedDate,\n\t\tTask_Count = value.Count\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FlattenTheTaskValueArray\nADOFeaturesJsonData foldDown(unroll(value),\n\tmapColumn(\n\t\tAssignedToUserSK = value.AssignedToUserSK,\n\t\tActivatedDate = value.ActivatedDate,\n\t\tFeature_Count = value.Count\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FlattenTheFeatureValueArray\nADOUserStoryJsonData foldDown(unroll(value),\n\tmapColumn(\n\t\tAssignedToUserSK = value.AssignedToUserSK,\n\t\tActivatedDate = value.ActivatedDate,\n\t\tUser_Story_Story_Points = value.StoryPoints,\n\t\tUser_Story_Count = value.Count\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FlattenTheUserStoryValueArray\nConvertActivatedDateToDate unpivot(output(\n\t\tActivityDesc as string,\n\t\t{ ActivityValue} as string\n\t),\n\tungroupBy(AssignedToUserSK,\n\t\tActivatedDate),\n\tlateral: false,\n\tignoreNullPivots: false,\n\tpartitionBy('hash', 1)) ~> UnpivotBugs\nADOGitJsonData foldDown(unroll(value),\n\tmapColumn(\n\t\tcommitId = value.commitId,\n\t\temail = value.committer.email,\n\t\tdate = value.committer.date,\n\t\tGit_Commit_Add = value.changeCounts.Add,\n\t\tGit_Commit_Edit = value.changeCounts.Edit,\n\t\tGit_Commit_Delete = value.changeCounts.Delete\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FlattenTGeGItJson\nADOUserData foldDown(unroll(value),\n\tmapColumn(\n\t\tUserSK = value.UserSK,\n\t\tUserId = value.UserId,\n\t\tUserName = value.UserName,\n\t\tUserEmail = value.UserEmail\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FLattenTheADOUserJsonData\nFlattenTGeGItJson, FLattenTheADOUserJsonData join(email == UserEmail,\n\tjoinType:'inner',\n\tpartitionBy('hash', 1),\n\tbroadcast: 'auto')~> Join1\nJoin1 select(mapColumn(\n\t\tAssignedToUserSK = UserSK,\n\t\tActivatedDate = date,\n\t\tGit_Commit_Add,\n\t\tGit_Commit_Edit,\n\t\tGit_Commit_Delete\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nConvertTheGItActivatedDateToDate unpivot(output(\n\t\tActivityDesc as string,\n\t\tAcivityValue as string\n\t),\n\tungroupBy(AssignedToUserSK,\n\t\tActivatedDate),\n\tlateral: false,\n\tignoreNullPivots: false,\n\tpartitionBy('hash', 1)) ~> UnpivotGitData\nConvertActivateDateToDate unpivot(output(\n\t\tActivityDesc as string,\n\t\tActivityValue as string\n\t),\n\tungroupBy(AssignedToUserSK,\n\t\tActivatedDate),\n\tlateral: false,\n\tignoreNullPivots: true,\n\tpartitionBy('hash', 1)) ~> UnpivotTasks\nConvertFeatureActivateDateToDate unpivot(output(\n\t\tActivityDesc as string,\n\t\tActivityValue as string\n\t),\n\tungroupBy(AssignedToUserSK,\n\t\tActivatedDate),\n\tlateral: false,\n\tignoreNullPivots: true,\n\tpartitionBy('hash', 1)) ~> UnpivotFeatures\nConvertUserStoryActivatedDateToDate unpivot(output(\n\t\tActivityDesc as string,\n\t\tActivityValue as string\n\t),\n\tungroupBy(AssignedToUserSK,\n\t\tActivatedDate),\n\tlateral: false,\n\tignoreNullPivots: true,\n\tpartitionBy('hash', 1)) ~> UnpivotUserStory\nAggregateTheActivityValueForFeatures, AggregateTheActivityValueForGit, AggregateTheActivityValueForBugs, AggregateTheActivityValueForTasks, AggregateTheActivityValueForUserStory union(byName: false,\n\tpartitionBy('hash', 1))~> CombineAllWorkItems\nCombineAllWorkItems filter(not(isNull(AssignedToUserSK)) && not(isNull(ActivatedDate)),\n\tpartitionBy('hash', 1)) ~> FilterOutAlltheNullValues\nFilterOutAlltheNullValues derive(DateKey = toInteger(replace(toString(ActivatedDate),'-','')),\n\t\tActivityValue = toInteger(ActivityValue)) ~> DerivedColumn1\nDerivedColumn1, ActivityData join(ActivityDesc == ActivityName,\n\tjoinType:'left',\n\tbroadcast: 'auto')~> ExtractActivityID\nExtractActivityID select(mapColumn(\n\t\tAssignedToUserSK,\n\t\tActivityId,\n\t\tDateKey,\n\t\tActivityValue,\n\t\tDate = ActivatedDate\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectWIthActivityID\nEmployeeData select(mapColumn(\n\t\tEmployeeId,\n\t\tADOUserSK\n\t),\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectEmployeeIDAndUserSK\nSelectWIthActivityID, SelectEmployeeIDAndUserSK join(AssignedToUserSK == ADOUserSK,\n\tjoinType:'inner',\n\tbroadcast: 'auto')~> JoinWithEmployee\nJoinWithEmployee select(mapColumn(\n\t\tEmployeeId,\n\t\tActivityId,\n\t\tDate,\n\t\tDateKey,\n\t\tActivityValue\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SelectTheRequiredColumns\nSort1, EmployeeActvityData exists(SelectTheRequiredColumns@EmployeeId == EmployeeActvityData@EmployeeId\n\t&& SelectTheRequiredColumns@DateKey == EmployeeActvityData@DateKey\n\t&& SelectTheRequiredColumns@ActivityId == EmployeeActvityData@ActivityId\n\t&& SelectTheRequiredColumns@ActivityValue == EmployeeActvityData@ActivityValue,\n\tnegate:true,\n\tpartitionBy('hash', 1),\n\tbroadcast: 'auto')~> UpdatetheEmplyeeActivityTable\nSelectTheRequiredColumns sort(asc(EmployeeId, true),\n\tasc(ActivityId, true),\n\tasc(DateKey, true),\n\tpartitionBy('hash', 1)) ~> Sort1\nUnpivotBugs aggregate(groupBy(AssignedToUserSK,\n\t\tActivatedDate,\n\t\tActivityDesc),\n\t{ ActivityValue} = sum(toInteger({ ActivityValue})),\n\tpartitionBy('hash', 1)) ~> AggregateTheActivityValueForBugs\nUpdatetheEmplyeeActivityTable alterRow(upsertIf(ActivityValue>=1)) ~> AlterRow1\nUnpivotTasks aggregate(groupBy(AssignedToUserSK,\n\t\tActivatedDate,\n\t\tActivityDesc),\n\tActivityValue = sum(toInteger(ActivityValue))) ~> AggregateTheActivityValueForTasks\nUnpivotFeatures aggregate(groupBy(AssignedToUserSK,\n\t\tActivatedDate,\n\t\tActivityDesc),\n\tActivityValue = sum(toInteger(ActivityValue))) ~> AggregateTheActivityValueForFeatures\nUnpivotUserStory aggregate(groupBy(AssignedToUserSK,\n\t\tActivatedDate,\n\t\tActivityDesc),\n\tActivityValue = sum(toInteger(ActivityValue))) ~> AggregateTheActivityValueForUserStory\nUnpivotGitData aggregate(groupBy(AssignedToUserSK,\n\t\tActivatedDate,\n\t\tActivityDesc),\n\tAcivityValue = sum(toInteger(AcivityValue))) ~> AggregateTheActivityValueForGit\nFlattenthevauearray derive(ActivatedDate = toDate(ActivatedDate,'yyyy-MM-dd')) ~> ConvertActivatedDateToDate\nFlattenTheTaskValueArray derive(ActivatedDate = toDate(ActivatedDate,'yyyy-MM-dd')) ~> ConvertActivateDateToDate\nFlattenTheFeatureValueArray derive(ActivatedDate = toDate(ActivatedDate,'yyyy-MM-dd')) ~> ConvertFeatureActivateDateToDate\nFlattenTheUserStoryValueArray derive(ActivatedDate = toDate(ActivatedDate,'yyyy-MM-dd')) ~> ConvertUserStoryActivatedDateToDate\nSelect1 derive(ActivatedDate = toDate(ActivatedDate,'yyyy-MM-dd')) ~> ConvertTheGItActivatedDateToDate\nAlterRow1 sink(input(\n\t\tEmployeeId as integer,\n\t\tActivityId as integer,\n\t\tDate as date,\n\t\tDateKey as integer,\n\t\tActivityValue as double\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['EmployeeId','ActivityId','DateKey'],\n\tformat: 'table',\n\tstaged: true,\n\tallowCopyCommand: true,\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> UpdateValuesToEmployeeActivtyTable"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/ADOWorkItemJsonTest')]",
+				"[concat(variables('workspaceId'), '/datasets/GitJsonDataADOTest')]",
+				"[concat(variables('workspaceId'), '/datasets/ADOUserJsonDataTest')]",
+				"[concat(variables('workspaceId'), '/datasets/ActivityMasterData')]",
+				"[concat(variables('workspaceId'), '/datasets/EmployeeMasterDataSet')]",
+				"[concat(variables('workspaceId'), '/datasets/EmployeeActivityDataSet')]",
+				"[concat(variables('workspaceId'), '/datasets/EmployeeActivityDataSink')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Load WPA Extract')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy_lz_rw",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy_lz_archive",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "wpa_test",
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": "*.csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "WPADataFile",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": "wpa_test",
+									"FileName": "wpa.csv"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "WPADataFile_RZ",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileName": "wpa.csv",
+									"FolderName": "raw/wpa"
+								}
+							}
+						]
+					},
+					{
+						"name": "Copy_rw_cz",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy_lz_rw",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": "*.csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "WPADataFile_RZ",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileName": "wpa.csv",
+									"FolderName": "raw/wpa"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "WPADataFile_CZ",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderName": "classification/wpa",
+									"FileName": "wpa.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "wpa_load",
+						"type": "SqlPoolStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Copy_rw_cz",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"sqlPool": {
+							"referenceName": "[parameters('sqlPoolName')]",
+							"type": "SqlPoolReference"
+						},
+						"typeProperties": {
+							"storedProcedureName": "[dbo].[usp_msft_fwk_wpa_dataload]"
+						}
+					},
+					{
+						"name": "Copy_lz_archive",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "wpa_test",
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "WPADataFile",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": "wpa_test",
+									"FileName": "wpa.csv"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "WPADataFile",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": {
+										"value": "@concat('archive\\wpa\\',pipeline().TriggerTime)",
+										"type": "Expression"
+									},
+									"FileName": "wpa.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Clear Landing files",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "wpa_load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "WPADataFile",
+								"type": "DatasetReference",
+								"parameters": {
+									"FolderPath": "wpa",
+									"FileName": "*"
+								}
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "SinkADLS",
+									"type": "LinkedServiceReference"
+								},
+								"path": "[concat(parameters('syanpseDefaultADLSFileSystemName'), '/classification/logging')]"
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"wildcardFileName": "*",
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "WPA Pipeline"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-01T07:55:23Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/WPADataFile')]",
+				"[concat(variables('workspaceId'), '/datasets/WPADataFile_RZ')]",
+				"[concat(variables('workspaceId'), '/datasets/WPADataFile_CZ')]",													  
+				"[concat(variables('workspaceId'), '/linkedServices/SinkADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/OdataCopy')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy WPA Data To ADLS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ODataSource",
+								"httpRequestTimeout": "00:05:00"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "WPAODataResource",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "WPAExtractedDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"annotations": [],
+				"lastPublishTime": "2021-03-19T13:34:52Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/WPAODataResource')]",
+				"[concat(variables('workspaceId'), '/datasets/WPAExtractedDataset')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ProcessADOData')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopyBugs",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "LoadADOWorkItems",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItem": "Bug"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADOWorkItemJson",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItemType": "Bugs"
+								}
+							}
+						]
+					},
+					{
+						"name": "TransformADOData",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "CopyBugs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyTasks",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyFeatures",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyUserStories",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyUsers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "CopyGitData",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "TransformADOData",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ADOBugsJson": {
+										"WorkItemType": "Bugs"
+									},
+									"ADOTasksJsonData": {
+										"WorkItemType": "Tasks"
+									},
+									"ADOFeaturesJsonData": {
+										"WorkItemType": "Features"
+									},
+									"ADOUserStoryJsonData": {
+										"WorkItemType": "UserStory"
+									},
+									"ADOGitJsonData": {},
+									"ADOUserData": {},
+									"ActivityData": {},
+									"EmployeeData": {},
+									"EmployeeActvityData": {},
+									"UpdateValuesToEmployeeActivtyTable": {}
+								}
+							},
+							"staging": {
+								"linkedService": {
+									"referenceName": "ClassificationADLS",
+									"type": "LinkedServiceReference"
+								},
+								"folderPath": "[concat(parameters('syanpseDefaultADLSFileSystemName'), '/classification')]"
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "CopyTasks",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "LoadADOWorkItems",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItem": "Task"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADOWorkItemJson",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItemType": "Tasks"
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyFeatures",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "LoadADOWorkItems",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItem": "Feature"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADOWorkItemJson",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItemType": "Features"
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyUserStories",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "LoadADOWorkItems",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItem": "User Story"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADOWorkItemJson",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItemType": "UserStory"
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyUsers",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "ADOUserDataSet",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADOWorkItemJson",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItemType": "User"
+								}
+							}
+						]
+					},
+					{
+						"name": "CopyGitData",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "GetGItJsonData",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADOWorkItemJson",
+								"type": "DatasetReference",
+								"parameters": {
+									"WorkItemType": "Git"
+								}
+							}
+						]
+					},
+					{
+						"name": "AppendDataTOActivityAggregateTable",
+						"type": "SqlPoolStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "TransformADOData",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"sqlPool": {
+							"referenceName": "[parameters('sqlPoolName')]",
+							"type": "SqlPoolReference"
+						},
+						"typeProperties": {
+							"storedProcedureName": "[dbo].[usp_msft_fwk_load_agg_employee]"
+						}
+					}
+				],
+				"folder": {
+					"name": "ADOPullPipeline"
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-02-01T07:55:03Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/LoadADOWorkItems')]",
+				"[concat(variables('workspaceId'), '/datasets/ADOWorkItemJson')]",
+				"[concat(variables('workspaceId'), '/dataflows/TransformADOData')]",
+				"[concat(variables('workspaceId'), '/linkedServices/ClassificationADLS')]",
+				"[concat(variables('workspaceId'), '/datasets/ADOUserDataSet')]",
+				"[concat(variables('workspaceId'), '/datasets/GetGItJsonData')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WPADemoOData')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "OData",
+				"typeProperties": {
+					"url": "[parameters('WPADemoOData_properties_typeProperties_url')]",
+					"authenticationType": "AadServicePrincipal",
+					"tenant": "[parameters('WPADemoOData_properties_typeProperties_tenant')]",
+					"aadResourceId": "[parameters('WPADemoOData_properties_typeProperties_aadResourceId')]",
+					"aadServicePrincipalCredentialType": "ServicePrincipalKey",
+					"servicePrincipalId": "[parameters('WPADemoOData_properties_typeProperties_servicePrincipalId')]",
+					"servicePrincipalKey": {
+						"type": "SecureString",
+						"value": "[parameters('WPADemoOData_servicePrincipalKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		}		
+	]
+}

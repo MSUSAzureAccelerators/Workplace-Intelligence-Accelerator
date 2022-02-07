@@ -1,0 +1,79 @@
+parameters:
+- name: 'StageName'
+  type: string
+- name: 'EnvironmentName'
+  type: string
+- name: 'PoolImage'
+  type: string
+
+
+jobs:
+- deployment: ${{parameters.StageName}}
+  displayName: 'Deploy to ${{parameters.StageName}}'
+  pool:
+    vmImage: ${{parameters.PoolImage}}
+  environment: '${{parameters.EnvironmentName}}'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: DownloadBuildArtifacts@0
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            downloadPath: '$(System.ArtifactsDirectory)'
+            artifactName: 'drop'
+            
+        - task: AzureResourceGroupDeployment@2
+          displayName: Provision Synapse Analytics Workspace
+          inputs:
+            azureSubscription:  '$(AzureServiceConnectionName)'
+            action: 'Create Or Update Resource Group'
+            resourceGroupName: $(ResourceGroupName)
+            location: $(ResourceGroupLocation)
+            templateLocation: 'Linked artifact'
+            csmFile: '$(System.ArtifactsDirectory)/drop/ARM/Synapse/AzureSynapseAnalytics.json'
+            csmParametersFile: '$(System.ArtifactsDirectory)/drop/ARM/Synapse/AzureSynapseAnalytics.parameters.json'
+            overrideParameters: '-name $(SynapseWorkspaceName) -location $(SynapseLocation) -defaultDataLakeStorageAccountName $(SyanpseDefaultADLSName) -defaultDataLakeStorageFilesystemName $(SyanpseDefaultADLSFileSystemName) -sqlAdministratorLogin $(SynapseSqlAdministratorLogin) -sqlAdministratorLoginPassword $(SynapseSqlAdministratorLoginPassword) -setWorkspaceIdentityRbacOnStorageAccount $(SynapseWorkspaceIdentityRbacOnStorageAccount) -allowAllConnections $(SynapseAllowAllConnections) -grantWorkspaceIdentityControlForSql $(SynapseGrantWorkspaceIdentityControlForSql) -managedVirtualNetwork $(SynapseManagedVirtualNetwork) -tagValues "{$(SynapseWorkspaceTags)}" -storageSubscriptionID $(SubscriptionId) -storageResourceGroupName $(ResourceGroupName) -storageLocation $(SynapseStorageLocation) -isNewStorageAccount $(SynapseIsNewStorageAccount) -isNewFileSystemOnly $(SynapseIsNewFileSystemOnly) -storageAccessTier $(SynapseStorageAccessTier) -storageAccountType $(SynapseStorageAccountType) -storageSupportsHttpsTrafficOnly $(SynapseStorageSupportsHttpsTrafficOnly) -storageKind $(SynapseStorageKind) -storageIsHnsEnabled $(SynapseStorageIsHnsEnabled) -setSbdcRbacOnStorageAccount $(SynapseSetUserRbacOnStorageAccount) -userObjectId $(SynapseStorageAccountAccessUserObjectID) -sqlActiveDirectoryAdminName $(SynapseSqlActiveDirectoryAdminName) -sqlActiveDirectoryAdminObjectId $(SynapseSqlActiveDirectoryAdminObjectId)'
+            deploymentMode: 'Incremental'
+        
+        - task: AzureResourceGroupDeployment@2
+          displayName: Provision Synapse SQL Pool
+          inputs:
+            azureSubscription:  '$(AzureServiceConnectionName)'
+            action: 'Create Or Update Resource Group'
+            resourceGroupName: $(ResourceGroupName)
+            location: $(ResourceGroupLocation)
+            templateLocation: 'Linked artifact'
+            csmFile: '$(System.ArtifactsDirectory)/drop/ARM/Synapse/AzureSynapseSQLPools.json'
+            csmParametersFile: '$(System.ArtifactsDirectory)/drop/ARM/Synapse/AzureSynapseSQLPools.parameters.json'
+            overrideParameters: '-sqlPoolName $(SqlPoolName) -workspaceName $(SynapseWorkspaceName) -location $(SqlPoolLocation) -tags "{$(SqlPoolTags)}" -sku $(SqlPoolSku) -collation $(SqlPoolCollation)'
+            deploymentMode: 'Incremental'
+        
+#        - task: AzureResourceGroupDeployment@2
+#          displayName: Provision Synapse Spark Pool
+#          inputs:
+#            azureSubscription:  '$(AzureServiceConnectionName)'
+#            action: 'Create Or Update Resource Group'
+#            resourceGroupName: $(ResourceGroupName)
+#            location: $(ResourceGroupLocation)
+#            templateLocation: 'Linked artifact'
+#            csmFile: '$(System.ArtifactsDirectory)/drop/ARM/Synapse/AzureSynapseSparkPools.json'
+#            csmParametersFile: '$(System.ArtifactsDirectory)/drop/ARM/Synapse/AzureSynapseSparkPools.parameters.json'
+#            overrideParameters: '-nodeCount $(SparkPoolNodeCount) -nodeSizeFamily $(SparkPoolNodeSizeFamily) -nodeSize $(SparkPoolNodeSize) -autoScaleMinNodeCount $(SparkPoolAutoScaleMinNodeCount) -autoScaleMaxNodeCount $(SparkPoolAutoScaleMaxNodeCount) -autoPauseDelayInMinutes $(SparkPoolAutoPauseDelayInMinutes) -sparkVersion $(SparkPoolSparkVersion) -workspaceName $(SynapseWorkspaceName) -location $(SparkPoolLocation) -name $(SparkPoolName) -autoScaleEnabled $(SparkPoolAutoScaleEnabled) -autoPauseEnabled $(SparkPoolAutoPauseEnabled) -tags "{$(SparkPoolTags)}"'
+#            deploymentMode: 'Incremental'
+            
+        - task: Bash@3
+          displayName: 'Assign Synapse Admin Roles'        
+          inputs:
+            targetType: 'filePath'
+            filePath: '$(System.ArtifactsDirectory)/drop/ARM/addSynapseRole.sh'
+          env:
+            SYSTEM_ACCESSTOKEN: $(system.accesstoken)
+            TENANT_ID: $(AzureActiveDirectoryTenantID)
+            CLIENT_ID: $(DevOpsApplicationClientID)
+            CLIENT_SECRET: $(DevOpsApplicationClientSecret)
+            WORKSPACE_NAME: $(SynapseWorkspaceName)
+            WS_ADMIN: $(SynapseWorkspaceAdminObjectID)
+            SQL_ADMIN: $(SqlPoolAdminObjectID)
+            SPARK_ADMIN: $(SqlPoolAdminObjectID)

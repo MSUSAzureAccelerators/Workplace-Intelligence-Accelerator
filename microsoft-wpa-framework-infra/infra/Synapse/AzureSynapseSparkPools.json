@@ -1,0 +1,105 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "workspaceName": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {}
+        },
+        "autoScaleEnabled": {
+            "type": "bool"
+        },
+        "autoScaleMinNodeCount": {
+            "type": "int",
+            "defaultValue": 3
+        },
+        "autoScaleMaxNodeCount": {
+            "type": "int",
+            "defaultValue": 40
+        },
+        "nodeCount": {
+            "type": "int",
+            "defaultValue": 3
+        },
+        "nodeSizeFamily": {
+            "type": "string"
+        },
+        "nodeSize": {
+            "type": "string"
+        },
+        "autoPauseEnabled": {
+            "type": "bool"
+        },
+        "autoPauseDelayInMinutes": {
+            "type": "int",
+            "defaultValue": 15
+        },
+        "sparkVersion": {
+            "type": "string"
+        },
+        "libraryRequirementsFilename": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "libraryRequirementsContent": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "variables": {
+		"roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+		"roleAssignmentName": "[guid(parameters('workspaceName'), parameters('name'))]"
+	},
+    "resources": [
+        {
+            "type": "Microsoft.Synapse/workspaces/bigDataPools",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[concat(parameters('workspaceName'), '/', parameters('name'))]",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
+            "properties": {
+                "nodeCount": "[parameters('nodeCount')]",
+                "nodeSizeFamily": "[parameters('nodeSizeFamily')]",
+                "nodeSize": "[parameters('nodeSize')]",
+                "autoScale": {
+                    "enabled": "[parameters('autoScaleEnabled')]",
+                    "minNodeCount": "[parameters('autoScaleMinNodeCount')]",
+                    "maxNodeCount": "[parameters('autoScaleMaxNodeCount')]"
+                },
+                "autoPause": {
+                    "enabled": "[parameters('autoPauseEnabled')]",
+                    "delayInMinutes": "[parameters('autoPauseDelayInMinutes')]"
+                },
+                "sparkVersion": "[parameters('sparkVersion')]",
+                "libraryRequirements": {
+                    "filename": "[parameters('libraryRequirementsFilename')]",
+                    "content": "[parameters('libraryRequirementsContent')]"
+                }
+            },
+			"resources" : [
+				{
+					"type": "Microsoft.Synapse/workspaces/bigDataPools/providers/roleAssignments",
+					"apiVersion": "2017-05-01",
+					"name": "[concat(parameters('workspaceName'), '/', parameters('name'), '/Microsoft.Authorization/', variables('roleAssignmentName'))]",
+					"properties": {
+						"roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId'))]",
+						"principalId": "[reference(concat('Microsoft.Synapse/workspaces/', parameters('workspaceName')), '2019-06-01-preview', 'Full').identity.principalId]"
+				    },
+					"dependsOn": [
+						  "[resourceId('Microsoft.Synapse/workspaces/bigDataPools', parameters('workspaceName'), parameters('name'))]"
+					]
+				}
+			]
+        }
+    ],
+    "outputs": {}
+}

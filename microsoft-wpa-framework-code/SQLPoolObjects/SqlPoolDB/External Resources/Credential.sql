@@ -1,0 +1,6 @@
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = '<masterKeyPassword>'
+GO 
+
+CREATE DATABASE SCOPED CREDENTIAL WorkspaceIdentity
+WITH IDENTITY = 'Managed Identity'
+GO

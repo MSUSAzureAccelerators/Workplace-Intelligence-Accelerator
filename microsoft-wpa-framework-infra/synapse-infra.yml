@@ -1,0 +1,96 @@
+trigger:
+  branches:
+   include:
+     - release
+     - development
+   exclude:
+     - master
+     - feature/*
+
+
+variables:
+  - name: PoolImage
+    value: 'vs2017-win2016'
+  - name: BuildJobDisplayName
+    value: 'Synapse Innovation Build'
+
+ #deployment variables
+    #DEV Environment
+  - name: StageName_Dev
+    value: 'Dev'
+  - name: StageDisplayName_Dev
+    value: 'Dev'
+  - name: EnvironmentName_Dev
+    value: 'Synapse-Dev'
+  - name: VariableGroup_Dev
+    value: 'WPA-Var-Grp'
+
+ #Test variables
+    #Test Environment
+  - name: StageName_Test
+    value: 'Test'
+  - name: StageDisplayName_Test
+    value: 'Test'
+  - name: EnvironmentName_Test
+    value: 'Synapse-Test'
+  - name: VariableGroup_Test
+    value: 'WPA-Var-Grp'
+
+ #Production variables
+    #Prod Environment
+  - name: StageName_Prod
+    value: 'Prod'
+  - name: StageDisplayName_Prod
+    value: 'Prod'
+  - name: EnvironmentName_Prod
+    value: 'Synapse-Prod'
+  - name: VariableGroup_Prod
+    value: 'WPA-Var-Grp'
+
+
+stages:
+- stage: Build
+  jobs:
+  - template: /microsoft-wpa-framework-infra/YamlTemplates/jobs/build/infra-build.yml
+    parameters:
+      PoolImage: $(PoolImage)
+      BuildJobDisplayName: '${{variables.BuildJobDisplayName}}'
+
+- stage: ${{variables.StageName_Dev}}
+  displayName: ${{variables.StageDisplayName_Dev}}
+  #condition: and(always(), contains(variables['Build.SourceBranch'], 'refs/heads/development'))
+  dependsOn: Build
+  variables:
+    - group: ${{variables.VariableGroup_Dev}}
+  jobs:
+  - template: /microsoft-wpa-framework-infra/YamlTemplates/jobs/release/infra-release.yml
+    parameters:
+      StageName: ${{variables.StageName_Dev}}
+      EnvironmentName: ${{variables.EnvironmentName_Dev}}
+      PoolImage: $(PoolImage)
+
+- stage: ${{variables.StageName_Test}}
+  displayName: ${{variables.StageDisplayName_Test}}
+  condition: and(always(), contains(variables['Build.SourceBranch'], 'refs/heads/Release'))
+  dependsOn: Build
+  variables:
+    - group: ${{variables.VariableGroup_Test}}
+  jobs:
+  - template: /microsoft-wpa-framework-infra/YamlTemplates/jobs/release/infra-release.yml
+    parameters:
+      StageName: ${{variables.StageName_Test}}
+      EnvironmentName: ${{variables.EnvironmentName_Test}}
+      PoolImage: $(PoolImage)
+
+- stage: ${{variables.StageName_Prod}}
+  displayName: ${{variables.StageDisplayName_Prod}}
+  condition: and(always(), contains(variables['Build.SourceBranch'], 'refs/heads/Release'))
+  dependsOn: ${{variables.StageName_Test}}
+  variables:
+    - group: ${{variables.VariableGroup_Prod}}
+  jobs:
+  - template: /microsoft-wpa-framework-infra/YamlTemplates/jobs/release/infra-release.yml
+    parameters:
+      StageName: ${{variables.StageName_Prod}}
+      EnvironmentName: ${{variables.EnvironmentName_Prod}}
+      PoolImage: $(PoolImage)

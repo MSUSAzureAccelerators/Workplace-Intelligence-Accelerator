@@ -1,0 +1,25 @@
+parameters:
+- name: 'PoolImage'
+  default: 'windows-2019'
+  type: string
+- name: 'BuildJobDisplayName'
+  default: 'Build Job'
+  type: string
+
+trigger: none
+
+
+jobs:
+- job: Build
+  displayName: '${{parameters.BuildJobDisplayName}}'
+  pool:
+    vmImage: ${{parameters.PoolImage}}
+
+  steps:
+  - checkout: self
+
+  - task: PowerShell@2
+    displayName: 'Add variables to Variable group'
+    inputs:
+      filePath: '$(build.SourcesDirectory)/microsoft-wpa-framework-variables/Scripts/AddVariables.ps1'
+      arguments: '$(build.SourcesDirectory)'

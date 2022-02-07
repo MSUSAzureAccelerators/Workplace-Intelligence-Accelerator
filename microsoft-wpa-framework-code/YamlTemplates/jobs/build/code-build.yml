@@ -1,0 +1,71 @@
+parameters:
+- name: 'PoolImage'
+  default: 'windows-2019'
+  type: string
+- name: 'BuildJobDisplayName'
+  default: 'Build Job'
+  type: string
+
+
+
+
+jobs:
+- job: Build
+  displayName: '${{parameters.BuildJobDisplayName}}'
+  pool:
+    vmImage: ${{parameters.PoolImage}}
+
+  steps:
+  - checkout: self
+
+  - task: AzurePowerShell@4
+    displayName: 'Replace text in source files'
+    inputs:
+        azureSubscription: '$(AzureServiceConnectionName)'
+        ScriptPath: '$(build.SourcesDirectory)/microsoft-wpa-framework-code/Scripts/ReplaceTextInSource.ps1'
+        ScriptArguments: '$(build.SourcesDirectory) $(SyanpseDefaultADLSName) $(SyanpseDefaultADLSFileSystemName) $(MasterKeyPassword)'
+        azurePowerShellVersion: LatestVersion
+
+  - task: VSBuild@1
+    displayName: 'Build Solution for SQL Pool DB'        
+    inputs:
+        solution: '**/*.sln'  
+        vsVersion: 'latest'
+        platform: 'any cpu'
+        configuration: ''        
+        logFileVerbosity: 'normal'
+        msbuildArchitecture: 'x86'
+
+
+  - task: CopyFiles@2
+    displayName: 'Copy SQL Pool DB Build Files'
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)/microsoft-wpa-framework-code/SQLPoolObjects/SqlPoolDB/bin/'
+      Contents: '**'
+      TargetFolder: '$(build.artifactstagingdirectory)/SqlPoolDB'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Template Files'
+    inputs:
+      SourceFolder: '$(build.SourcesDirectory)/microsoft-wpa-framework-code/WorkspaceTemplates'
+      Contents: '**'
+      TargetFolder: '$(build.artifactstagingdirectory)/WorkspaceTemplates'
+
+  - task: CopyFiles@2
+    displayName: 'Copy Script Files'
+    inputs:
+        SourceFolder: '$(build.SourcesDirectory)/microsoft-wpa-framework-code/Scripts'
+        Contents: '**'
+        TargetFolder: '$(build.artifactstagingdirectory)/Scripts'
+    
+  - task: CopyFiles@2
+    displayName: 'Copy Data Files'
+    inputs:
+        SourceFolder: '$(build.SourcesDirectory)/microsoft-wpa-framework-code/SQLPoolObjects/SqlPoolDB/Data/'
+        Contents: 'D_Date.csv'
+        TargetFolder: '$(build.artifactstagingdirectory)/Data'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(build.artifactstagingdirectory)'

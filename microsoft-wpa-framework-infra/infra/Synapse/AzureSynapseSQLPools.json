@@ -1,0 +1,63 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlPoolName": {
+            "type": "string"
+        },
+        "sku": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "workspaceName": {
+            "type": "string"
+        },
+        "collation": {
+            "type": "string"
+        },
+        "metadataSync": {
+            "type": "bool",
+            "defaultValue": false
+        },
+        "tags": {
+            "type": "object",
+            "defaultValue": {}
+        }
+    },
+	"variables": {
+		"roleDefinitionId": "b24988ac-6180-42a0-ab88-20f7382dd24c",
+		"roleAssignmentName": "[guid(parameters('workspaceName'), parameters('sqlPoolName'))]"
+	},
+    "resources": [
+        {
+            "type": "Microsoft.Synapse/workspaces/sqlPools",
+            "apiVersion": "2019-06-01-preview",
+            "location": "[parameters('location')]",
+            "tags": "[parameters('tags')]",
+            "name": "[concat(parameters('workspaceName'), '/', parameters('sqlPoolName'))]",
+            "sku": {
+                "name": "[parameters('sku')]"
+            },
+            "properties": {
+                "createMode": "Default",
+                "collation": "[parameters('collation')]"
+            },
+			"resources" : [
+				{
+					"type": "Microsoft.Synapse/workspaces/sqlPools/providers/roleAssignments",
+					"apiVersion": "2017-05-01",
+					"name": "[concat(parameters('workspaceName'), '/', parameters('sqlPoolName'), '/Microsoft.Authorization/', variables('roleAssignmentName'))]",
+					"properties": {
+						"roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId'))]",
+						"principalId": "[reference(concat('Microsoft.Synapse/workspaces/', parameters('workspaceName')), '2019-06-01-preview', 'Full').identity.principalId]"
+				    },
+					"dependsOn": [
+						  "[resourceId('Microsoft.Synapse/workspaces/sqlPools', parameters('workspaceName'), parameters('sqlPoolName'))]"
+					]
+				}
+			]
+        }
+    ]
+}

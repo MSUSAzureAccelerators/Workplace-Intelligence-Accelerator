@@ -1,0 +1,45 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "nodeCount": {
+            "value": 3
+        },
+        "nodeSizeFamily": {
+            "value": "MemoryOptimized"
+        },
+        "nodeSize": {
+            "value": "Small"
+        },
+        "autoScaleEnabled": {
+            "value": true
+        },
+        "autoScaleMinNodeCount": {
+            "value": 3
+        },
+        "autoScaleMaxNodeCount": {
+            "value": 3
+        },
+        "autoPauseEnabled": {
+            "value": true
+        },
+        "autoPauseDelayInMinutes": {
+            "value": 15
+        },
+        "sparkVersion": {
+            "value": "2.4"
+        },
+        "workspaceName": {
+            "value": "ckvsynapsepocnewn"
+        },
+        "location": {
+            "value": "eastus"
+        },
+        "name": {
+            "value": "ckvsparkpocnewn"
+        },
+        "tags": {
+            "value": {}
+        }
+    }
+}

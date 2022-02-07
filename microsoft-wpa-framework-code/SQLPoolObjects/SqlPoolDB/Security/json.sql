@@ -1,0 +1,3 @@
+﻿CREATE SCHEMA [json]
+    AUTHORIZATION [dbo];
+

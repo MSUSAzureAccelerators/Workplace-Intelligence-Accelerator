@@ -1,0 +1,91 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "value": "dummysynapse"
+        },
+        "location": {
+            "value": "eastus"
+        },
+        "defaultDataLakeStorageAccountName": {
+            "value": "dummystoragefs"
+        },
+        "defaultDataLakeStorageFilesystemName": {
+            "value": "dummyfilesystem"
+        },
+        "sqlAdministratorLogin": {
+            "value": "sqladminuser"
+        },
+        "sqlAdministratorLoginPassword": {
+            "value": "Complex#27092020"
+        },
+        "setWorkspaceIdentityRbacOnStorageAccount": {
+            "value": true
+        },
+        "allowAllConnections": {
+            "value": true
+        },
+        "grantWorkspaceIdentityControlForSql": {
+            "value": "Enabled"
+        },
+        "managedVirtualNetwork": {
+            "value": ""
+        },
+        "tagValues": {
+            "value": {
+                "BillTo": "CKV",
+                "Dept": "Analytics",
+                "Email": "mijo.joseph@neudesic.com"
+            }
+        },
+        "storageSubscriptionID": {
+            "value": "9911c2e3-65d7-49ef-91da-ab2c1dd21e14"
+        },
+        "storageResourceGroupName": {
+            "value": "learn-synapse"
+        },
+        "storageLocation": {
+            "value": "eastus"
+        },
+        "storageRoleUniqueId": {
+            "value": ""
+        },		
+        "isNewStorageAccount": {
+            "value": true
+        },
+        "isNewFileSystemOnly": {
+            "value": false
+        },
+        "adlaResourceId": {
+            "value": ""
+        },
+        "storageAccessTier": {
+            "value": "Hot"
+        },
+        "storageAccountType": {
+            "value": "Standard_RAGRS"
+        },
+        "storageSupportsHttpsTrafficOnly": {
+            "value": true
+        },
+        "storageKind": {
+            "value": "StorageV2"
+        },
+        "storageIsHnsEnabled": {
+            "value": true
+        },
+        "userObjectId": {
+            "value": ""
+        },
+		"sqlActiveDirectoryAdminName": {
+            "value": "Azure-Synapse-Contributor"
+        },
+		"sqlActiveDirectoryAdminObjectId": {
+            "value": "4a8d5cf6-6c94-44c3-9aa6-6a4561581dc4"
+        },
+        "setSbdcRbacOnStorageAccount": {
+            "value": false
+        }
+    }
+}

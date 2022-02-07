@@ -1,0 +1,60 @@
+parameters:
+- name: 'StageName'
+  type: string
+- name: 'EnvironmentName'
+  type: string
+- name: 'PoolImage'
+  type: string
+
+
+jobs:
+- deployment: ${{parameters.StageName}}
+  displayName: 'Deploy to ${{parameters.StageName}}'
+  pool:
+    vmImage: ${{parameters.PoolImage}}
+  environment: '${{parameters.EnvironmentName}}'
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - task: DownloadBuildArtifacts@0
+          inputs:
+            buildType: 'current'
+            downloadType: 'single'
+            downloadPath: '$(System.ArtifactsDirectory)'
+            artifactName: 'drop'
+
+        - task: AzurePowerShell@4
+          displayName: 'Add folders in ADLS'
+          inputs:
+            azureSubscription: '$(AzureServiceConnectionName)'
+            ScriptPath: '$(System.ArtifactsDirectory)/drop/Scripts/AddContainersInStorageAccount.ps1'
+            ScriptArguments: '$(ResourceGroupName) $(SyanpseDefaultADLSName) $(SyanpseDefaultADLSFileSystemName) $(SourceADLSContainerName)'
+            azurePowerShellVersion: LatestVersion
+
+        - task: SqlAzureDacpacDeployment@1
+          displayName: 'Deploy Sql Pool Schema'        
+          inputs:
+            azureSubscription:  '$(AzureServiceConnectionName)'
+            serverName: '$(SynapseWorkspaceName).sql.azuresynapse.net'
+            databaseName: '$(SqlPoolName)'
+            sqlUserName: '$(SynapseSqlAdministratorLogin)'
+            sqlPassword: '$(SynapseSqlAdministratorLoginPassword)'         
+            dacpacFile: '$(System.ArtifactsDirectory)/drop/SqlPoolDB/Debug/SqlPoolDB.dacpac'
+            deployType: 'DacpacTask'
+            deploymentAction: 'Publish'
+            
+        - task: CmdLine@2
+          displayName: 'Bulk copy D_Date data'
+          inputs:
+            script: 'bcp D_Date in $(System.ArtifactsDirectory)/drop/Data/D_Date.csv -S $(SynapseWorkspaceName).sql.azuresynapse.net -d $(SqlPoolName) -U $(SynapseSqlAdministratorLogin) -P $(SynapseSqlAdministratorLoginPassword) -F 2 -q -c -t ,'
+            
+        - task: AzureSynapseWorkspace.synapsecicd-deploy.synapse-deploy.Synapse workspace deployment@1
+          displayName: 'Synpase artifacts deployment task for workspace'          
+          inputs:
+            TemplateFile: '$(System.ArtifactsDirectory)/drop/WorkspaceTemplates/TemplateForWorkspace.json'
+            ParametersFile: '$(System.ArtifactsDirectory)/drop/WorkspaceTemplates/TemplateParametersForWorkspace.json'
+            azureSubscription: '$(AzureServiceConnectionName)'
+            ResourceGroupName: '$(ResourceGroupName)'
+            TargetWorkspaceName: '$(SynapseWorkspaceName)'
+            OverrideArmParameters: '-workspaceName $(SynapseWorkspaceName) -sqlPoolName $(SqlPoolName) -syanpseDefaultStorageAccountName $(SyanpseDefaultADLSName) -syanpseDefaultADLSFileSystemName $(SyanpseDefaultADLSFileSystemName) -keyVaultName $(KeyVaultName) -LinkToADOPassword $(LinkToADOPassword) -LinkToGitPassword $(LinkToGitPassword) -LinkToADOUserName $(LinkToADOUserName) -LinkToGitUserName $(LinkToGitUserName) -LinkToADOUrl $(LinkToADOUrl) -LinkToGitUrl $(LinkToGitUrl) -workspaceID $(powerBIWorkspaceID) -tenantID $(powerBITenantID) -WPADemoOData_properties_typeProperties_url $(WPA_Properties_url) -WPADemoOData_properties_typeProperties_aadResourceId $(WPA_Properties_aadResourceId) -WPADemoOData_properties_typeProperties_tenant $(AzureActiveDirectoryTenantID) -WPADemoOData_servicePrincipalKey $(DevOpsApplicationClientSecret) -WPADemoOData_properties_typeProperties_servicePrincipalId $(DevOpsApplicationClientID)'

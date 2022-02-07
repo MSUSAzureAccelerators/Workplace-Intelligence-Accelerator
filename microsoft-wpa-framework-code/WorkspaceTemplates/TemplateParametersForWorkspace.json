@@ -1,0 +1,108 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "wpademosynws1"
+		},
+		"sqlPoolName": {
+        "value": "wpademosqlpool1"
+        },
+		"workspaceID": {
+			"value": "ffb6de67-5c59-4437-b716-0b9fe2f55a2f"
+		},
+		"tenantID": {
+			"value": "687f51c3-0c5d-4905-84f8-97c683a5b9d1"
+		},
+		"syanpseDefaultStorageAccountName": {
+        "value": "wpademosa1"
+        },
+		"syanpseDefaultADLSFileSystemName": {
+        "value": "wpademofs1"
+        },
+		"WPADemoOData_properties_typeProperties_url": {
+			"value": "https://workplaceanalytics.office.com/4fed98a0-18c6-43bf-add5-f9681f5a1a1f/scopes/bd723c2e-05bd-4232-b30a-4d7ba5e3921f/jobsodata/e31a6b99-33af-4446-88f7-0e0b6ac3a2e2/Person"
+		},
+		"WPADemoOData_properties_typeProperties_aadResourceId": {
+			"value": "https://workplaceanalytics.office.com"
+		},
+		"WPADemoOData_properties_typeProperties_tenant": {
+			"value": ""
+		},
+		"WPADemoOData_servicePrincipalKey": {
+			"value": ""
+		},
+		"WPADemoOData_properties_typeProperties_servicePrincipalId": {
+			"value": ""
+		},
+		"AzureSynapseAnalyticsSQLPool_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=hssipdemosynws1.sql.azuresynapse.net;Initial Catalog=sipdemosqlpool1"
+		},
+		"ClassificationADLS_accountKey": {
+			"value": ""
+		},
+		"LinkToADOPassword": {
+			"value": ""
+		},
+		"LinkToGitPassword": {
+			"value": ""
+		},
+		"MetadataDB_connectionString": {
+			"value": ""
+		},
+		"SinkADLS_accountKey": {
+			"value": ""
+		},
+		"SourceADLS_accountKey": {
+			"value": ""
+		},
+		"azblb_lz_csv_connectionString": {
+			"value": ""
+		},
+		"azblz_wpa_lz_csv_connectionString": {
+			"value": ""
+		},
+		"cz_ADLS_accountKey": {
+			"value": ""
+		},
+		"ls_logging_adls_connectionString": {
+			"value": ""
+		},
+		"ls_sqlpool_connectionString": {
+			"value": ""
+		},
+		"msftfwkwpasynws-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"serverlesspool_connectionString": {
+			"value": ""
+		},
+		"ClassificationADLS_properties_typeProperties_url": {
+			"value": "https://sipdemosa.dfs.core.windows.net"
+		},
+		"LinkToADOUrl": {
+			"value": "https://analytics.dev.azure.com/SLLRestricted/Synapse Innovation/_odata/v3.0-preview/"
+		},
+		"LinkToADOUserName": {
+			"value": "jon.kastner@neudesic.com"
+		},
+		"LinkToGitUrl": {
+			"value": "https://dev.azure.com/SLLRestricted/Synapse%20Innovation/_apis/git/repositories/synapse-framework-infra/commits?api-version=6"
+		},
+		"LinkToGitUserName": {
+			"value": "jon.kastner@neudesic.com"
+		},
+		"SinkADLS_properties_typeProperties_url": {
+			"value": "https://sipdemosa.dfs.core.windows.net"
+		},
+		"SourceADLS_properties_typeProperties_url": {
+			"value": "https://sipdemosa.dfs.core.windows.net"
+		},
+		"cz_ADLS_properties_typeProperties_url": {
+			"value": "https://sipdemosa.dfs.core.windows.net"
+		},
+		"msftfwkwpasynws-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://sipdemosa.dfs.core.windows.net"
+		}
+	}
+}
