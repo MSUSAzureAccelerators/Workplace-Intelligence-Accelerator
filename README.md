@@ -3,7 +3,7 @@
 # Workplace Intelligence Solution Accelerator
 
 ## About this repository
-nspired employees are 125% more productive than an employee who is merely satisfied. While almost three quarters (71%) of organizations see the need for workplace intelligence strategies as critical to their business success over the next year, only 8 percent feel equipped to act on that need.
+Inspired employees are 125% more productive than an employee who is merely satisfied. While almost three quarters (71%) of organizations see the need for workplace intelligence strategies as critical to their business success over the next year, only 8 percent feel equipped to act on that need.
 
 The Workplace Intelligence Solution Accelerator leverages machine learning and big data analytics to combine and transform data, allowing customer to easily identify factors that influence how people work in their organization. This solution unlocks insights and recommendations to aid customer software development and HR teams to maximize product feature velocity, increased product quality, monitor employee burnout risk, and increase employee productivity.
 
