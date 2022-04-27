@@ -7,6 +7,23 @@ Inspired employees are 125% more productive than an employee who is merely satis
 
 The Workplace Intelligence Solution Accelerator leverages machine learning and big data analytics to combine and transform data, allowing customer to easily identify factors that influence how people work in their organization. This solution unlocks insights and recommendations to aid customer software development and HR teams to maximize product feature velocity, increased product quality, monitor employee burnout risk, and increase employee productivity.
 
+### Challenges
+
+* Customer wants to create, manage, and track targeted change management plans to help reduce meeting load and increase focus time.
+* Customer wants to use research-based behavioral insights and workflow information to learn how the organization currently gets work done and how to maintain or change work patterns over time.
+* Customer wants to keep valued employees in business-critical rolls and keep internal leadership pipeline full. Customer wants to increase employee satisfaction and engagement without reducing productivity
+
+> Inspired employees are 125% more productive than an employee who is merely satisfied
+
+### Benefits
+
+* Easily launch your solution using pre-built, pre-configured GitHub code and architecture.
+* Gain more collaboration time, improve your meetings, and share knowledge.
+* Identify work habits or distractions that reduce your team's ability to focus on core priorities.
+* Determine effective means to improve employees' work-life balance.
+* Reduce development time with end-to-end unified analytics via Azure Synapse Analytics, Azure Machine Learning, and Power BI.
+* Quickly analyze data to determine which factors impact workforce efficiency.
+
 ## License
 Copyright (c) Microsoft Corporation
 
