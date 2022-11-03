@@ -2,8 +2,6 @@
 
 # Workplace Intelligence Accelerator
 
-## About this repository
-
 Businesses are using the power of data to transform their organization's sytems and processes, but many overlook the impact of applying the same principles to its workforce. Inspired employees are 125% more productive than an employee who is merely satisfied. While almost three quarters (71%) of organizations see the need for workplace intelligence strategies as critical to their business success over the next year, only 8 percent feel equipped to act on that need.
 
 The Neudesic Workplace Intelligence Accelerator built on Microsoft Azure leverages machine learning and big data analytics to combine and transform data, allowing customers to easily identify factors that influence productivity and engagement. This accelerator unlocks insights and recommendations to aid customer software development and HR teams to maximize product feature velocity, increased product quality, monitor employee burnout risk, and increase employee productivity. It can also help you uncover and leverage the key drivers of productivity and success for product development teams by helping to pinpoint the processes and tools that boost performance and worker wellbeing so they can deliver innovative high-quality products and services.
