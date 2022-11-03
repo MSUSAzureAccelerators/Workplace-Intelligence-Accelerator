@@ -21,6 +21,7 @@ Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides v
 * Product quality and release velocity are impacted when teams work with incomplete and inaccurate metrics.
 
 > Productive businesses have around 30%-50% higher operating margins thatn those less productive companies
+
 > 25% decrease in the available labor pool in the tech industry while the number of posted jobs nearly doubles over the same period
 
 ### Benefits
