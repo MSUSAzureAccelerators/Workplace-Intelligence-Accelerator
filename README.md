@@ -26,17 +26,17 @@ Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides v
 
 ### Benefits
 
-* Gain more collaboration time, improve your meetings, and share knowledge.
-* Identify work habits or distractions that reduce your team's ability to focus on core priorities.
-* Determine effective means to improve employees' work-life balance.
-* Reduce development time with end-to-end unified analytics via Azure Synapse Analytics, Azure Machine Learning, and Power BI.
-* Quickly analyze data to determine which factors impact workforce efficiency.
-* Pinpoint and reduce sources of tech debt, distraction, and disruption.
-* Find and replicate processes that maximize developer productivity.
-* Indentify the best technologies for a given task or function.
-* Reduce friction by optimizing tools to automate task and workflow initiation.
-* Build a holistic accelerator with tools already in your environment.
-* Create a strong technical culture by retaining most talented developers.
+* **Gain more** collaboration time, improve your meetings, and share knowledge.
+* **Identify work habits or distractions** that reduce your team's ability to focus on core priorities.
+* Determine effective means to **improve employees' work-life balance**.
+* **Reduce development time** with end-to-end unified analytics via Azure Synapse Analytics, Azure Machine Learning, and Power BI.
+* **Quickly analyze data** to determine which factors impact workforce efficiency.
+* **Pinpoint and reduce** sources of tech debt, distraction, and disruption.
+* Find and replicate processes that **maximize developer productivity**.
+* **Identify the best technologies** for a given task or function.
+* Reduce friction by optimizing tools to **automate task and workflow initiation**.
+* **Build a holistic accelerator** with tools already in your environment.
+* Create a **strong technical culture** by retaining most talented developers.
 
 ## License
 
