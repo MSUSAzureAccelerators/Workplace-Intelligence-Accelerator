@@ -20,9 +20,7 @@ Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides v
 * Institutional knowlege is lost when top performers leave their jobs.
 * Product quality and release velocity are impacted when teams work with incomplete and inaccurate metrics.
 
-## Productive businesses have around 30%-50% higher operating margins than those less productive companies
-
-## 25% decrease in the available labor pool in the tech industry while the number of posted jobs nearly doubles over the same period
+> 25% decrease in the available labor pool in the tech industry while the number of posted jobs nearly doubles over the same period
 
 ### Benefits
 
@@ -37,6 +35,9 @@ Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides v
 * Reduce friction by optimizing tools to **automate task and workflow initiation**.
 * **Build a holistic accelerator** with tools already in your environment.
 * Create a **strong technical culture** by retaining most talented developers.
+
+> Productive businesses have around 30%-50% higher operating margins than those less productive companies
+
 
 ## License
 
