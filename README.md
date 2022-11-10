@@ -2,21 +2,20 @@
 
 # Workplace Intelligence Accelerator
 
-Businesses are using the power of data to transform their organization's sytems and processes, but many overlook the impact of applying the same principles to its workforce. Inspired employees are 125% more productive than an employee who is merely satisfied. While almost three quarters (71%) of organizations see the need for workplace intelligence strategies as critical to their business success over the next year, only 8 percent feel equipped to act on that need.
+Businesses are using the power of data to transform their organization's systems and processes, but many overlook the impact of applying the same principles to its workforce. Inspired employees are 125% more productive than an employee who is merely satisfied. While almost three quarters (71%) of organizations see the need for workplace intelligence strategies as critical to their business success over the next year, only 8 percent feel equipped to act on that need.
 
-The Neudesic Workplace Intelligence Accelerator built on Microsoft Azure leverages machine learning and big data analytics to combine and transform data, allowing customers to easily identify factors that influence productivity and engagement. This accelerator unlocks insights and recommendations to aid customer software development and HR teams to maximize product feature velocity, increased product quality, monitor employee burnout risk, and increase employee productivity. It can also help you uncover and leverage the key drivers of productivity and success for product development teams by helping to pinpoint the processes and tools that boost performance and worker wellbeing so they can deliver innovative high-quality products and services.
+The Neudesic Workplace Intelligence Accelerator built on Microsoft Azure leverages machine learning and big data analytics to combine and transform data, allowing customers to easily identify factors that influence productivity and engagement. This accelerator unlocks insights and recommendations to aid customer software development and HR teams to maximize product feature velocity, increase product quality, monitor employee burnout risk, and increase employee productivity. It can also help you uncover and leverage the key drivers of productivity and success for product development teams by helping to pinpoint the processes and tools that boost performance and worker wellbeing so they can deliver innovative high-quality products and services.
 
 Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides visibility into work habit data from Microsoft 365 to help your team optimize efficiency, improve collaboration, and maintain health work/life balance.
 
 ### Challenges
 
-* Customer wants to create, manage, and track targeted change management plans to help reduce meeting load and increase focus time.
-* Customer wants to use research-based behavioral insights and workflow information to learn how the organization currently gets work done and how to maintain or change work patterns over time.
-* Customer wants to keep valued employees in business-critical rolls and keep internal leadership pipeline full. 
-* Customer wants to increase employee satisfaction and engagement without reducing productivity.
-* Workplace practice are difficult to meause and understand what changes could enable productivity.
+* Reduce meeting load and increase focus time.
+* How to maintain or change work patterns over time to help organization get work done.
+* Keep valued employees in business-critical roles and keep internal leadership pipeline full. 
+* Increase employee satisfaction and engagement without reducing productivity.
+* Workplace practices are difficult to measuse and understand what changes could enable productivity.
 * Sources of tech debt are challenging to identify.
-* Data-driven insights on accelerator performance are needed to determine which tool is best for a given task.
 * Institutional knowlege is lost when top performers leave their jobs.
 * Product quality and release velocity are impacted when teams work with incomplete and inaccurate metrics.
 
@@ -27,7 +26,7 @@ Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides v
 * **Gain more** collaboration time, improve your meetings, and share knowledge.
 * **Identify work habits or distractions** that reduce your team's ability to focus on core priorities.
 * Determine effective means to **improve employees' work-life balance**.
-* **Reduce development time** with end-to-end unified analytics via Azure Synapse Analytics, Azure Machine Learning, and Power BI.
+* **Reduce development time** with end-to-end unified analytics.
 * **Quickly analyze data** to determine which factors impact workforce efficiency.
 * **Pinpoint and reduce** sources of tech debt, distraction, and disruption.
 * Find and replicate processes that **maximize developer productivity**.
@@ -38,9 +37,7 @@ Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides v
 
 > Productive businesses have around 30%-50% higher operating margins than those less productive companies
 
-
 ## License
-
 Copyright (c) Microsoft Corporation
 
 All rights reserved.
@@ -75,3 +72,4 @@ trademarks or logos is subject to and must follow
 [Microsoft's Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship.
 Any use of third-party trademarks or logos are subject to those third-party's policies.
+
