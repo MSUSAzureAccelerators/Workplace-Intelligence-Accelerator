@@ -14,7 +14,7 @@ Azure Synapse Analytics leverages AI and Power BI in a dashboard that provides v
 * How to maintain or change work patterns over time to help organization get work done.
 * Keep valued employees in business-critical roles and keep internal leadership pipeline full. 
 * Increase employee satisfaction and engagement without reducing productivity.
-* Workplace practices are difficult to measuse and understand what changes could enable productivity.
+* Workplace practices are difficult to measure and understand what changes could enable productivity.
 * Sources of tech debt are challenging to identify.
 * Institutional knowlege is lost when top performers leave their jobs.
 * Product quality and release velocity are impacted when teams work with incomplete and inaccurate metrics.
